@@ -150,8 +150,9 @@
             try {
                 const res = await fetch(`${API}/api/families`);
                 families = await res.json();
-                const select = document.getElementById('person');
-                select.innerHTML = '<option>Select family...</option>';
+                    const select = document.getElementById('person');
+                    const current = select.value;
+                    select.innerHTML = '<option>Select family...</option>';
                 families.forEach(f => {
                     const opt = document.createElement('option');
                     opt.value = f.name;
@@ -160,6 +161,7 @@
                 });
                 updateFamiliesList();
             } catch (e) { console.error(e); }
+            if (current) select.value = current;
         }
 
         function updateFamiliesList() {
