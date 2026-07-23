@@ -51,7 +51,7 @@
         <div id="items" class="tab-content active">
             <h2>Add Item</h2>
             <div class="form-group">
-                <label>Person:</label>
+                <label>Family:</label>
                 <select id="person"><option>Select family...</option></select>
             </div>
             <div class="form-group">
@@ -146,23 +146,23 @@
             }
         }
 
-        async function loadFamilies() {
-            try {
-                const res = await fetch(`${API}/api/families`);
-                families = await res.json();
-                    const select = document.getElementById('person');
-                    const current = select.value;
-                    select.innerHTML = '<option>Select family...</option>';
-                families.forEach(f => {
-                    const opt = document.createElement('option');
-                    opt.value = f.name;
-                    opt.textContent = f.name;
-                    select.appendChild(opt);
-                });
-                updateFamiliesList();
-            } catch (e) { console.error(e); }
-            if (current) select.value = current;
-        }
+  async function loadFamilies() {
+    try {
+        const res = await fetch(`${API}/api/families`);
+        families = await res.json();
+        const select = document.getElementById('person');
+        const current = select.value; // Save current selection
+        select.innerHTML = '<option>Select family...</option>';
+        families.forEach(f => {
+            const opt = document.createElement('option');
+            opt.value = f.name;
+            opt.textContent = f.name;
+            select.appendChild(opt);
+        });
+        if (current && current !== 'Select family...') select.value = current; // Restore selection
+        updateFamiliesList();
+    } catch (e) { console.error(e); }
+}
 
         function updateFamiliesList() {
             const list = document.getElementById('familiesList');
