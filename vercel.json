@@ -1,0 +1,10 @@
+{
+  "buildCommand": "npm install",
+  "devCommand": "node server.js",
+<<<<<<< HEAD
+  "installCommand": "npm install",
+  "framework": "nodejs"
+=======
+  "installCommand": "npm install"
+>>>>>>> 8f007f66d78131e93d9c0bc3daa05c44a2d9f694
+}

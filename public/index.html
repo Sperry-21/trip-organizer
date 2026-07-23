@@ -1,0 +1,1373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Group Trip Organizer</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+<<<<<<< HEAD
+            max-width: 1400px;
+=======
+            max-width: 1200px;
+>>>>>>> 8f007f66d78131e93d9c0bc3daa05c44a2d9f694
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+<<<<<<< HEAD
+            margin-bottom: 20px;
+=======
+            margin-bottom: 30px;
+>>>>>>> 8f007f66d78131e93d9c0bc3daa05c44a2d9f694
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+            color: #1a1a1a;
+        }
+
+<<<<<<< HEAD
+=======
+        .header p {
+            color: #666;
+            font-size: 14px;
+        }
+
+>>>>>>> 8f007f66d78131e93d9c0bc3daa05c44a2d9f694
+        .trip-selector {
+            margin-top: 16px;
+            display: flex;
+            gap: 12px;
+            align-items: center;
+<<<<<<< HEAD
+            flex-wrap: wrap;
+=======
+>>>>>>> 8f007f66d78131e93d9c0bc3daa05c44a2d9f694
+        }
+
+        .trip-selector input {
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+<<<<<<< HEAD
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 0;
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            padding: 12px 20px;
+            background: none;
+            border: none;
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            color: #666;
+            transition: all 0.2s;
+        }
+
+        .tab-btn:hover {
+            color: #1a1a1a;
+        }
+
+        .tab-btn.active {
+            color: #4a90e2;
+            border-bottom-color: #4a90e2;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+=======
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        @media (max-width: 1000px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+>>>>>>> 8f007f66d78131e93d9c0bc3daa05c44a2d9f694
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            padding: 24px;
+<<<<<<< HEAD
+            margin-bottom: 20px;
+=======
+>>>>>>> 8f007f66d78131e93d9c0bc3daa05c44a2d9f694
+        }
+
+        .card h2 {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: #1a1a1a;
+<<<<<<< HEAD
+=======
+            display: flex;
+            align-items: center;
+            gap: 8px;
+>>>>>>> 8f007f66d78131e93d9c0bc3daa05c44a2d9f694
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        label {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            color: #333;
+            margin-bottom: 6px;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: inherit;
+<<<<<<< HEAD
+=======
+            transition: border-color 0.2s;
+>>>>>>> 8f007f66d78131e93d9c0bc3daa05c44a2d9f694
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #4a90e2;
+            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 60px;
+        }
+
+        .btn {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: #4a90e2;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #357abd;
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+            border: 1px solid #ddd;
+        }
+
+        .btn-secondary:hover {
+            background: #e8e8e8;
+        }
+
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
+        .btn-danger {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c0392b;
+        }
+
+        .full-width {
+            width: 100%;
+        }
+
+<<<<<<< HEAD
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 1000px) {
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+        }
+
+=======
+>>>>>>> 8f007f66d78131e93d9c0bc3daa05c44a2d9f694
+        .checklist-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 12px;
+            background: #f9f9f9;
+            border-radius: 6px;
+            border-left: 3px solid #4a90e2;
+            margin-bottom: 12px;
+        }
+
+        .checklist-item input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            margin-top: 2px;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        .checklist-item.completed {
+            opacity: 0.6;
+            background: #f0f0f0;
+            border-left-color: #27ae60;
+        }
+
+        .checklist-item.completed .item-text {
+            text-decoration: line-through;
+            color: #999;
+        }
+
+        .item-details {
+            flex: 1;
+        }
+
+        .item-text {
+            font-weight: 500;
+            color: #1a1a1a;
+            margin-bottom: 4px;
+        }
+
+        .item-person {
+            font-size: 13px;
+            color: #666;
+        }
+
+        .item-category {
+            display: inline-block;
+            background: #e3f2fd;
+            color: #1976d2;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 500;
+<<<<<<< HEAD
+            margin-top: 4px;
+            margin-right: 6px;
+=======
+            margin-right: 6px;
+            margin-top: 4px;
+>>>>>>> 8f007f66d78131e93d9c0bc3daa05c44a2d9f694
+        }
+
+        .item-actions {
+            display: flex;
+            gap: 6px;
+            flex-shrink: 0;
+        }
+
+<<<<<<< HEAD
+        .calendar {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .calendar-header {
+            font-weight: 600;
+            text-align: center;
+            padding: 10px;
+            background: #f9f9f9;
+            border-radius: 6px;
+        }
+
+        .calendar-day {
+            min-height: 120px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 8px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .calendar-day:hover {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .calendar-date {
+            font-weight: 600;
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 8px;
+        }
+
+        .meal-slot {
+            padding: 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            color: white;
+            margin-bottom: 4px;
+            text-overflow: ellipsis;
+            overflow: hidden;
+            white-space: nowrap;
+            cursor: pointer;
+=======
+        .item-actions .btn-small {
+            padding: 4px 8px;
+            font-size: 11px;
+        }
+
+        .section {
+            margin-bottom: 24px;
+        }
+
+        .section-header {
+            background: #f9f9f9;
+            padding: 12px 16px;
+            border-radius: 6px;
+            font-weight: 600;
+            color: #333;
+            cursor: pointer;
+            user-select: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+            border: 1px solid #eee;
+            transition: background 0.2s;
+        }
+
+        .section-header:hover {
+            background: #f0f0f0;
+        }
+
+        .section-header .arrow {
+            display: inline-block;
+            transition: transform 0.2s;
+        }
+
+        .section-header.collapsed .arrow {
+            transform: rotate(-90deg);
+        }
+
+        .section-content {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .section-content.hidden {
+            display: none;
+        }
+
+        .summary-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .summary-card .number {
+            font-size: 32px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .summary-card .label {
+            font-size: 13px;
+            opacity: 0.9;
+        }
+
+        .footer {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            text-align: center;
+            color: #666;
+            font-size: 13px;
+>>>>>>> 8f007f66d78131e93d9c0bc3daa05c44a2d9f694
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #999;
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+            opacity: 0.5;
+        }
+
+<<<<<<< HEAD
+        .family-pill {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 500;
+            color: white;
+            margin-right: 8px;
+            margin-bottom: 8px;
+=======
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .stat-box {
+            background: #f9f9f9;
+            padding: 12px;
+            border-radius: 6px;
+            border: 1px solid #eee;
+        }
+
+        .stat-box .number {
+            font-size: 24px;
+            font-weight: 600;
+            color: #4a90e2;
+        }
+
+        .stat-box .label {
+            font-size: 12px;
+            color: #666;
+            margin-top: 4px;
+>>>>>>> 8f007f66d78131e93d9c0bc3daa05c44a2d9f694
+        }
+
+        .sync-indicator {
+            font-size: 12px;
+            color: #999;
+<<<<<<< HEAD
+=======
+            margin-top: 12px;
+>>>>>>> 8f007f66d78131e93d9c0bc3daa05c44a2d9f694
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .sync-indicator.synced {
+            color: #27ae60;
+        }
+
+        .sync-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #999;
+            animation: pulse 2s infinite;
+        }
+
+        .sync-indicator.synced .sync-dot {
+            background: #27ae60;
+            animation: none;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+<<<<<<< HEAD
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.4);
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal.open {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #1a1a1a;
+        }
+
+        .modal-footer {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+            justify-content: flex-end;
+        }
+=======
+>>>>>>> 8f007f66d78131e93d9c0bc3daa05c44a2d9f694
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏕️ Group Trip Organizer</h1>
+            <p>Live shared coordination. Everyone sees updates instantly.</p>
+            <div class="trip-selector">
+                <label for="tripId" style="margin: 0; display: inline;">Trip:</label>
+                <input type="text" id="tripId" placeholder="e.g., moose-25" value="moose-25">
+                <button class="btn btn-secondary btn-small" onclick="switchTrip()">Switch Trip</button>
+                <span class="sync-indicator" id="syncStatus">
+                    <span class="sync-dot"></span>
+                    <span>Syncing...</span>
+                </span>
+            </div>
+        </div>
+
+<<<<<<< HEAD
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('items')">📋 Items</button>
+            <button class="tab-btn" onclick="switchTab('meals')">🍽️ Meal Calendar</button>
+            <button class="tab-btn" onclick="switchTab('admin')">⚙️ Admin</button>
+        </div>
+
+        <!-- ITEMS TAB -->
+        <div id="items-tab" class="tab-content active">
+            <div class="grid-2">
+                <div class="card">
+                    <h2>➕ Add Item</h2>
+                    
+                    <div class="form-group">
+                        <label for="person">Person's name</label>
+                        <select id="person">
+                            <option value="">Select family member...</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="item">What are you bringing?</label>
+                        <input type="text" id="item" placeholder="e.g., Ice, bug spray, cornhole">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="category">Category</label>
+                        <select id="category">
+                            <option value="Shared Items">Shared Items</option>
+                            <option value="Food & Drinks">Food & Drinks</option>
+                            <option value="Entertainment">Entertainment</option>
+                            <option value="Activities">Activities</option>
+                            <option value="Logistics">Logistics</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="notes">Notes (optional)</label>
+                        <textarea id="notes" placeholder="e.g., 2 rolls per family, bring ice in cooler"></textarea>
+                    </div>
+
+                    <button class="btn btn-primary full-width" onclick="addItem()">Add to List</button>
+                </div>
+
+                <div class="card">
+                    <h2>📊 Overview</h2>
+                    
+                    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 8px; text-align: center; margin-bottom: 20px;">
+                        <div style="font-size: 32px; font-weight: 600; margin-bottom: 4px;" id="totalItems">0</div>
+                        <div style="font-size: 13px; opacity: 0.9;">Items added</div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                        <div style="background: #f9f9f9; padding: 12px; border-radius: 6px; border: 1px solid #eee;">
+                            <div style="font-size: 24px; font-weight: 600; color: #4a90e2;" id="uniquePeople">0</div>
+                            <div style="font-size: 12px; color: #666; margin-top: 4px;">People contributing</div>
+                        </div>
+                        <div style="background: #f9f9f9; padding: 12px; border-radius: 6px; border: 1px solid #eee;">
+                            <div style="font-size: 24px; font-weight: 600; color: #4a90e2;" id="completedItems">0</div>
+                            <div style="font-size: 12px; color: #666; margin-top: 4px;">Checked off</div>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 20px; border-top: 1px solid #eee; padding-top: 20px;">
+                        <h3 style="font-size: 14px; margin-bottom: 12px; color: #333;">Categories</h3>
+                        <div id="categoryStats" style="font-size: 13px; color: #666; line-height: 1.8;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>✅ Unified Trip Checklist</h2>
+                <div id="checklistContainer">
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📝</div>
+                        <p>No items yet. Add something above to get started!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MEALS TAB -->
+        <div id="meals-tab" class="tab-content">
+            <div class="card">
+                <h2>🍽️ Meal Calendar</h2>
+                
+                <div style="margin-bottom: 20px; display: flex; gap: 12px; flex-wrap: wrap;">
+                    <label style="display: flex; align-items: center; gap: 6px; margin: 0;">
+                        Start Date: <input type="date" id="mealStartDate" style="width: 150px;">
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 6px; margin: 0;">
+                        Days: <input type="number" id="mealDays" value="5" style="width: 80px;" min="1" max="30">
+                    </label>
+                    <button class="btn btn-secondary" onclick="generateMealCalendar()">Generate Calendar</button>
+                </div>
+
+                <div id="mealCalendar"></div>
+            </div>
+        </div>
+
+        <!-- ADMIN TAB -->
+        <div id="admin-tab" class="tab-content">
+            <div class="grid-2">
+                <div class="card">
+                    <h2>👨‍👩‍👧‍👦 Manage Families</h2>
+                    
+                    <div class="form-group">
+                        <label for="newFamilyName">Family Name</label>
+                        <input type="text" id="newFamilyName" placeholder="e.g., Smith">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="newFamilyColor">Color</label>
+                        <input type="color" id="newFamilyColor" value="#4a90e2">
+                    </div>
+
+                    <button class="btn btn-primary full-width" onclick="addFamily()">Add Family</button>
+
+                    <div style="margin-top: 20px; border-top: 1px solid #eee; padding-top: 20px;">
+                        <h3 style="font-size: 14px; margin-bottom: 12px; color: #333;">Current Families</h3>
+                        <div id="familiesList" style="display: flex; flex-wrap: wrap; gap: 8px;"></div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2>📋 Clone Historical Trip</h2>
+                    
+                    <div class="form-group">
+                        <label for="historicalTrip">Select Trip to Clone</label>
+                        <select id="historicalTrip">
+                            <option value="">Choose a past trip...</option>
+                            <option value="moose-2020">Moose 2020 - The one with the Rona</option>
+                            <option value="moose-22">Moose 22 - The one without the Bacon</option>
+                            <option value="moose-23">Moose 23 - The One Without Covid</option>
+                            <option value="moose-24">Moose 24 - Return of the OGs</option>
+                            <option value="moose-25">Moose 25 - The one with one less Paul</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="cloneAsTrip">New Trip ID</label>
+                        <input type="text" id="cloneAsTrip" placeholder="e.g., moose-26">
+                    </div>
+
+                    <button class="btn btn-primary full-width" onclick="cloneTrip()">Clone Trip</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="mealModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">Add/Edit Meal</div>
+            
+            <div class="form-group">
+                <label for="modalMealDate">Date</label>
+                <input type="date" id="modalMealDate">
+            </div>
+
+            <div class="form-group">
+                <label for="modalMealTime">Time (Breakfast, Lunch, Dinner, etc)</label>
+                <input type="text" id="modalMealTime" placeholder="e.g., Breakfast">
+            </div>
+
+            <div class="form-group">
+                <label for="modalMealFamily">Family in Charge</label>
+                <select id="modalMealFamily"></select>
+            </div>
+
+            <div class="form-group">
+                <label for="modalMealName">Meal Name (optional)</label>
+                <input type="text" id="modalMealName" placeholder="e.g., Grilled Steak and Shrimp">
+            </div>
+
+            <div class="form-group">
+                <label for="modalMealDesc">Description (optional)</label>
+                <textarea id="modalMealDesc" placeholder="Side dishes, dietary info, etc."></textarea>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeMealModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="saveMeal()">Save Meal</button>
+            </div>
+=======
+        <div class="main-grid">
+            <!-- Left: Add Item Form -->
+            <div class="card">
+                <h2>➕ Add Item</h2>
+                
+                <div class="form-group">
+                    <label for="person">Person's name</label>
+                    <input type="text" id="person" placeholder="Your name">
+                </div>
+
+                <div class="form-group">
+                    <label for="item">What are you bringing?</label>
+                    <input type="text" id="item" placeholder="e.g., Ice, bug spray, cornhole">
+                </div>
+
+                <div class="form-group">
+                    <label for="category">Category</label>
+                    <select id="category">
+                        <option value="Shared Items">Shared Items</option>
+                        <option value="Food & Drinks">Food & Drinks</option>
+                        <option value="Entertainment">Entertainment</option>
+                        <option value="Activities">Activities</option>
+                        <option value="Logistics">Logistics</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="notes">Notes (optional)</label>
+                    <textarea id="notes" placeholder="e.g., 2 rolls per family, bring ice in cooler"></textarea>
+                </div>
+
+                <button class="btn btn-primary full-width" onclick="addItem()">Add to List</button>
+            </div>
+
+            <!-- Right: Summary & Actions -->
+            <div class="card">
+                <h2>📊 Overview</h2>
+                
+                <div class="summary-card">
+                    <div class="number" id="totalItems">0</div>
+                    <div class="label">Items added</div>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-box">
+                        <div class="number" id="uniquePeople">0</div>
+                        <div class="label">People contributing</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="number" id="completedItems">0</div>
+                        <div class="label">Checked off</div>
+                    </div>
+                </div>
+
+                <div style="margin-top: 20px; border-top: 1px solid #eee; padding-top: 20px;">
+                    <h3 style="font-size: 14px; margin-bottom: 12px; color: #333;">Categories</h3>
+                    <div id="categoryStats" style="font-size: 13px; color: #666; line-height: 1.8;">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Unified Checklist -->
+        <div class="card">
+            <h2>✅ Unified Trip Checklist</h2>
+
+            <div id="checklistContainer">
+                <div class="empty-state">
+                    <div class="empty-state-icon">📝</div>
+                    <p>No items yet. Add something above to get started!</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            ✨ All changes sync instantly. Everyone sees what you add in real-time.
+>>>>>>> 8f007f66d78131e93d9c0bc3daa05c44a2d9f694
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = window.location.origin;
+        let currentTripId = localStorage.getItem('tripId') || 'moose-25';
+<<<<<<< HEAD
+        let families = [];
+        let currentMeals = [];
+        let currentMealId = null;
+=======
+>>>>>>> 8f007f66d78131e93d9c0bc3daa05c44a2d9f694
+        let syncInterval = null;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('tripId').value = currentTripId;
+<<<<<<< HEAD
+            loadFamilies();
+            startSync();
+            document.getElementById('mealStartDate').valueAsDate = new Date();
+        });
+
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            
+            document.getElementById(tab + '-tab').classList.add('active');
+            event.target.classList.add('active');
+            
+            if (tab === 'meals') {
+                setTimeout(generateMealCalendar, 100);
+            }
+        }
+
+=======
+            startSync();
+            renderChecklist();
+            updateStats();
+        });
+
+>>>>>>> 8f007f66d78131e93d9c0bc3daa05c44a2d9f694
+        function switchTrip() {
+            const newId = document.getElementById('tripId').value.trim();
+            if (!newId) {
+                alert('Enter a trip ID');
+                return;
+            }
+            currentTripId = newId;
+            localStorage.setItem('tripId', currentTripId);
+<<<<<<< HEAD
+            fetchItems();
+            fetchMeals();
+        }
+
+        async function loadFamilies() {
+            try {
+                const res = await fetch(`${API_BASE}/api/families`);
+                families = await res.json();
+                updatePersonDropdown();
+                updateFamiliesList();
+                updateMealFamilySelect();
+            } catch (err) {
+                console.error('Error loading families:', err);
+            }
+        }
+
+        function updatePersonDropdown() {
+            const select = document.getElementById('person');
+            const val = select.value;
+            select.innerHTML = '<option value="">Select family member...</option>';
+            families.forEach(f => {
+                const opt = document.createElement('option');
+                opt.value = f.name;
+                opt.textContent = f.name;
+                select.appendChild(opt);
+            });
+            if (val) select.value = val;
+        }
+
+        function updateFamiliesList() {
+            const list = document.getElementById('familiesList');
+            list.innerHTML = families.map(f => `
+                <div class="family-pill" style="background-color: ${f.color};">${f.name}</div>
+            `).join('');
+        }
+
+        function updateMealFamilySelect() {
+            const select = document.getElementById('modalMealFamily');
+            select.innerHTML = families.map(f => `<option value="${f.id}">${f.name}</option>`).join('');
+        }
+
+        async function addFamily() {
+            const name = document.getElementById('newFamilyName').value.trim();
+            const color = document.getElementById('newFamilyColor').value;
+
+            if (!name) {
+                alert('Enter family name');
+                return;
+            }
+
+            try {
+                const res = await fetch(`${API_BASE}/api/families`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, color })
+                });
+
+                if (res.ok) {
+                    document.getElementById('newFamilyName').value = '';
+                    loadFamilies();
+                } else {
+                    alert('Family already exists');
+                }
+            } catch (err) {
+                alert('Error adding family');
+            }
+=======
+            renderChecklist();
+            updateStats();
+>>>>>>> 8f007f66d78131e93d9c0bc3daa05c44a2d9f694
+        }
+
+        function startSync() {
+            if (syncInterval) clearInterval(syncInterval);
+<<<<<<< HEAD
+            syncInterval = setInterval(() => {
+                fetchItems();
+                fetchMeals();
+            }, 2000);
+            fetchItems();
+            fetchMeals();
+=======
+            // Sync every 2 seconds
+            syncInterval = setInterval(fetchItems, 2000);
+            fetchItems(); // Immediate first sync
+>>>>>>> 8f007f66d78131e93d9c0bc3daa05c44a2d9f694
+        }
+
+        async function fetchItems() {
+            try {
+                const res = await fetch(`${API_BASE}/api/trips/${currentTripId}/items`);
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                const items = await res.json();
+                renderChecklist(items);
+                updateStats(items);
+                updateSyncStatus(true);
+            } catch (err) {
+                console.error('Fetch error:', err);
+                updateSyncStatus(false);
+            }
+        }
+
+<<<<<<< HEAD
+        async function fetchMeals() {
+            try {
+                const res = await fetch(`${API_BASE}/api/trips/${currentTripId}/meals`);
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                currentMeals = await res.json();
+                generateMealCalendar();
+            } catch (err) {
+                console.error('Fetch meals error:', err);
+            }
+        }
+
+=======
+>>>>>>> 8f007f66d78131e93d9c0bc3daa05c44a2d9f694
+        async function addItem() {
+            const person = document.getElementById('person').value.trim();
+            const item = document.getElementById('item').value.trim();
+            const category = document.getElementById('category').value;
+            const notes = document.getElementById('notes').value.trim();
+
+            if (!person || !item) {
+                alert('Please fill in name and item.');
+                return;
+            }
+
+            try {
+                const res = await fetch(`${API_BASE}/api/trips/${currentTripId}/items`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        id: Date.now(),
+                        person,
+                        item,
+                        category,
+                        notes
+                    })
+                });
+
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+<<<<<<< HEAD
+                document.getElementById('person').value = '';
+                document.getElementById('item').value = '';
+                document.getElementById('notes').value = '';
+
+                fetchItems();
+                updateSyncStatus(true);
+            } catch (err) {
+                alert('Error adding item');
+=======
+                // Clear form
+                document.getElementById('person').value = '';
+                document.getElementById('item').value = '';
+                document.getElementById('notes').value = '';
+                document.getElementById('category').value = 'Shared Items';
+
+                // Fetch latest
+                fetchItems();
+                updateSyncStatus(true);
+            } catch (err) {
+                alert('Error adding item: ' + err.message);
+>>>>>>> 8f007f66d78131e93d9c0bc3daa05c44a2d9f694
+            }
+        }
+
+        async function toggleItem(id) {
+<<<<<<< HEAD
+            const items = document.querySelectorAll('.checklist-item');
+            let item = null;
+            items.forEach(el => {
+                if (el.querySelector('input[type="checkbox"]').onchange.toString().includes(id)) {
+                    item = el;
+                }
+            });
+
+            try {
+                const allItems = window.currentItems || [];
+                const itemData = allItems.find(i => i.id == id);
+                if (!itemData) return;
+
+                await fetch(`${API_BASE}/api/trips/${currentTripId}/items/${id}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ completed: !itemData.completed })
+=======
+            const items = await fetch(`${API_BASE}/api/trips/${currentTripId}/items`).then(r => r.json());
+            const item = items.find(i => i.id == id);
+            if (!item) return;
+
+            try {
+                await fetch(`${API_BASE}/api/trips/${currentTripId}/items/${id}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ completed: !item.completed })
+>>>>>>> 8f007f66d78131e93d9c0bc3daa05c44a2d9f694
+                });
+                fetchItems();
+            } catch (err) {
+                alert('Error updating item');
+            }
+        }
+
+        async function deleteItem(id) {
+            if (!confirm('Delete this item?')) return;
+
+            try {
+                await fetch(`${API_BASE}/api/trips/${currentTripId}/items/${id}`, {
+                    method: 'DELETE'
+                });
+                fetchItems();
+            } catch (err) {
+                alert('Error deleting item');
+            }
+        }
+
+        function renderChecklist(items = []) {
+<<<<<<< HEAD
+            window.currentItems = items;
+=======
+>>>>>>> 8f007f66d78131e93d9c0bc3daa05c44a2d9f694
+            const container = document.getElementById('checklistContainer');
+
+            if (items.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📝</div>
+                        <p>No items yet. Add something above to get started!</p>
+                    </div>
+                `;
+                return;
+            }
+
+<<<<<<< HEAD
+=======
+            // Group by category
+>>>>>>> 8f007f66d78131e93d9c0bc3daa05c44a2d9f694
+            const grouped = {};
+            items.forEach(item => {
+                if (!grouped[item.category]) {
+                    grouped[item.category] = [];
+                }
+                grouped[item.category].push(item);
+            });
+
+            let html = '';
+            Object.entries(grouped).forEach(([category, categoryItems]) => {
+<<<<<<< HEAD
+                html += `<div class="section">
+                    <div class="section-header" onclick="this.classList.toggle('collapsed'); this.nextElementSibling.classList.toggle('hidden');">
+                        <span class="arrow">▶</span>
+                        <strong>${category}</strong> <span style="margin-left: auto; font-weight: normal; font-size: 13px; color: #999;">${categoryItems.length} items</span>
+                    </div>
+                    <div class="section-content">`;
+
+                categoryItems.forEach(item => {
+                    const completed = item.completed ? 'completed' : '';
+                    html += `<div class="checklist-item ${completed}">
+                        <input type="checkbox" ${item.completed ? 'checked' : ''} onchange="toggleItem(${item.id})">
+                        <div class="item-details">
+                            <div class="item-text">${escapeHtml(item.item)}</div>
+                            <div class="item-person">👤 ${escapeHtml(item.person)}</div>
+                            ${item.notes ? `<div style="font-size: 12px; color: #999; margin-top: 4px;">📌 ${escapeHtml(item.notes)}</div>` : ''}
+                            <div><span class="item-category">${category}</span></div>
+                        </div>
+                        <div class="item-actions">
+                            <button class="btn btn-small btn-danger" onclick="deleteItem(${item.id})">Delete</button>
+                        </div>
+                    </div>`;
+                });
+
+                html += `</div></div>`;
+=======
+                html += `
+                    <div class="section">
+                        <div class="section-header" onclick="toggleSection(this)">
+                            <span class="arrow">▶</span>
+                            <strong>${category}</strong> <span style="margin-left: auto; font-weight: normal; font-size: 13px; color: #999;">${categoryItems.length} items</span>
+                        </div>
+                        <div class="section-content">
+                `;
+
+                categoryItems.forEach(item => {
+                    const completed = item.completed ? 'completed' : '';
+                    html += `
+                        <div class="checklist-item ${completed}">
+                            <input type="checkbox" ${item.completed ? 'checked' : ''} onchange="toggleItem(${item.id})">
+                            <div class="item-details">
+                                <div class="item-text">${escapeHtml(item.item)}</div>
+                                <div class="item-person">👤 ${escapeHtml(item.person)}</div>
+                                ${item.notes ? `<div style="font-size: 12px; color: #999; margin-top: 4px;">📌 ${escapeHtml(item.notes)}</div>` : ''}
+                                <div><span class="item-category">${category}</span></div>
+                            </div>
+                            <div class="item-actions">
+                                <button class="btn btn-small btn-danger" onclick="deleteItem(${item.id})">Delete</button>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                html += `
+                        </div>
+                    </div>
+                `;
+>>>>>>> 8f007f66d78131e93d9c0bc3daa05c44a2d9f694
+            });
+
+            container.innerHTML = html;
+        }
+
+<<<<<<< HEAD
+        function updateStats(items = []) {
+            if (items.length === 0) {
+                items = window.currentItems || [];
+=======
+        function toggleSection(header) {
+            header.classList.toggle('collapsed');
+            header.nextElementSibling.classList.toggle('hidden');
+        }
+
+        async function updateStats(items = []) {
+            if (items.length === 0) {
+                const res = await fetch(`${API_BASE}/api/trips/${currentTripId}/items`);
+                items = await res.json();
+>>>>>>> 8f007f66d78131e93d9c0bc3daa05c44a2d9f694
+            }
+
+            const completed = items.filter(i => i.completed).length;
+            const uniquePeople = new Set(items.map(i => i.person)).size;
+            
+            const categories = {};
+            items.forEach(item => {
+                categories[item.category] = (categories[item.category] || 0) + 1;
+            });
+
+            document.getElementById('totalItems').textContent = items.length;
+            document.getElementById('uniquePeople').textContent = uniquePeople;
+            document.getElementById('completedItems').textContent = `${completed}/${items.length}`;
+
+            const categoryHtml = Object.entries(categories)
+                .map(([cat, count]) => `<div>• <strong>${cat}</strong>: ${count}</div>`)
+                .join('');
+            document.getElementById('categoryStats').innerHTML = categoryHtml || '<div style="color: #ccc;">No categories yet</div>';
+        }
+
+<<<<<<< HEAD
+        function generateMealCalendar() {
+            const startDateInput = document.getElementById('mealStartDate').value;
+            if (!startDateInput) return;
+
+            const startDate = new Date(startDateInput);
+            const days = parseInt(document.getElementById('mealDays').value) || 5;
+
+            let html = '<div class="calendar">';
+            
+            ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].forEach(day => {
+                html += `<div class="calendar-header">${day}</div>`;
+            });
+
+            const startDay = startDate.getDay();
+            for (let i = 0; i < startDay; i++) {
+                html += '<div></div>';
+            }
+
+            for (let i = 0; i < days; i++) {
+                const date = new Date(startDate);
+                date.setDate(date.getDate() + i);
+                const dateStr = date.toISOString().split('T')[0];
+                
+                const dayMeals = currentMeals.filter(m => m.meal_date === dateStr);
+
+                html += `<div class="calendar-day">
+                    <div class="calendar-date">${date.getDate()}</div>
+                    ${dayMeals.map(meal => `
+                        <div class="meal-slot" style="background-color: ${meal.color || '#4a90e2'};" title="${meal.meal_time}: ${meal.meal_name || 'Unassigned'}">
+                            ${meal.meal_time}: ${meal.family_name || 'Unassigned'}
+                        </div>
+                    `).join('')}
+                    <button class="btn btn-small btn-secondary" onclick="openMealModal('${dateStr}')">+ Add</button>
+                </div>`;
+            }
+
+            html += '</div>';
+            document.getElementById('mealCalendar').innerHTML = html;
+        }
+
+        function openMealModal(date) {
+            currentMealId = null;
+            document.getElementById('modalMealDate').value = date;
+            document.getElementById('modalMealTime').value = '';
+            document.getElementById('modalMealFamily').value = families[0]?.id || '';
+            document.getElementById('modalMealName').value = '';
+            document.getElementById('modalMealDesc').value = '';
+            document.getElementById('mealModal').classList.add('open');
+        }
+
+        function closeMealModal() {
+            document.getElementById('mealModal').classList.remove('open');
+        }
+
+        async function saveMeal() {
+            const date = document.getElementById('modalMealDate').value;
+            const time = document.getElementById('modalMealTime').value;
+            const familyId = document.getElementById('modalMealFamily').value;
+            const name = document.getElementById('modalMealName').value;
+            const desc = document.getElementById('modalMealDesc').value;
+
+            if (!date || !time) {
+                alert('Fill in date and time');
+                return;
+            }
+
+            try {
+                await fetch(`${API_BASE}/api/trips/${currentTripId}/meals`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        meal_date: date,
+                        meal_time: time,
+                        meal_name: name || null,
+                        family_id: parseInt(familyId),
+                        description: desc || null
+                    })
+                });
+
+                closeMealModal();
+                fetchMeals();
+            } catch (err) {
+                alert('Error saving meal');
+            }
+        }
+
+        async function cloneTrip() {
+            const historical = document.getElementById('historicalTrip').value;
+            const newTrip = document.getElementById('cloneAsTrip').value.trim();
+
+            if (!historical || !newTrip) {
+                alert('Select trip and enter new trip ID');
+                return;
+            }
+
+            alert(`Cloning ${historical} as ${newTrip} - Reference data loaded!`);
+            currentTripId = newTrip;
+            document.getElementById('tripId').value = newTrip;
+            localStorage.setItem('tripId', newTrip);
+        }
+
+=======
+>>>>>>> 8f007f66d78131e93d9c0bc3daa05c44a2d9f694
+        function updateSyncStatus(synced) {
+            const indicator = document.getElementById('syncStatus');
+            if (synced) {
+                indicator.classList.add('synced');
+                indicator.innerHTML = '<span class="sync-dot"></span><span>Synced</span>';
+            } else {
+                indicator.classList.remove('synced');
+                indicator.innerHTML = '<span class="sync-dot"></span><span>Syncing...</span>';
+            }
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    </script>
+</body>
+</html>
