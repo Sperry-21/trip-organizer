@@ -32,8 +32,11 @@
 </head>
 <body>
     <div class="container">
-        <h1>🏕️ Group Trip Organizer</h1>
-        <p>Live shared coordination for group trips.</p>
+        <h1>🏕️ Moose Lake </h1>
+        <p>When I say moose.......</p>
+        <div id="logisticsBanner" style="background: #fff3cd; border: 1px solid #ffc107; border-radius: 4px; padding: 15px; margin-bottom: 20px; display: none;">
+    <strong>📋 Logistics:</strong> <span id="logisticsText"></span>
+</div>
         
         <div class="trip-selector">
             <label>Trip ID:</label>
@@ -120,6 +123,12 @@
             </div>
             <button onclick="addFamily()">Add Family</button>
             <div id="familiesList" style="margin-top: 20px;"></div>
+            <h2 style="margin-top: 40px;">Trip Logistics</h2>
+<div class="form-group">
+    <label>Logistics Notes:</label>
+    <textarea id="logisticsInput" rows="4" placeholder="e.g., Meet at parking lot at 9am, bring cash for tolls..."></textarea>
+</div>
+<button onclick="saveLogistics()">Save Logistics</button>
         </div>
     </div>
 
@@ -131,6 +140,7 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             loadFamilies();
+            loadLogistics();
             loadItems();
             document.getElementById('mealStartDate').valueAsDate = new Date();
             setInterval(() => { loadItems(); }, 3000);
@@ -148,6 +158,7 @@
             if (id) {
                 currentTripId = id;
                 loadItems();
+                loadLogistics();
             }
         }
 
@@ -362,6 +373,24 @@
                 alert('Error saving meal');
             }
         }
+        function loadLogistics() {
+    const text = localStorage.getItem(`logistics-${currentTripId}`);
+    if (text) {
+        document.getElementById('logisticsText').textContent = text;
+        document.getElementById('logisticsBanner').style.display = 'block';
+        document.getElementById('logisticsInput').value = text;
+    } else {
+        document.getElementById('logisticsBanner').style.display = 'none';
+    }
+}
+
+function saveLogistics() {
+    const text = document.getElementById('logisticsInput').value.trim();
+    if (!text) return alert('Enter logistics notes');
+    localStorage.setItem(`logistics-${currentTripId}`, text);
+    loadLogistics();
+    alert('Logistics saved!');
+}
     </script>
 </body>
 </html>
