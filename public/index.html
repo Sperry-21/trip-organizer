@@ -129,25 +129,25 @@
             <textarea id="logisticsInput" rows="4" placeholder="e.g., Meet at parking lot at 9am, bring cash for tolls..."></textarea>
         </div>
         <button onclick="saveLogistics()">Save Logistics</button>
-        </div>
+       </div>
         <h2 style="margin-top: 40px;">Clone Past Trip</h2>
-<div class="form-group">
-    <label>Select Trip to Clone:</label>
-    <select id="tripToClone">
-        <option value="">Choose a past trip...</option>
-        <option value="moose-20">Moose 2020</option>
-        <option value="moose-22">Moose 22</option>
-        <option value="moose-23">Moose 23</option>
-        <option value="moose-24">Moose 24</option>
-        <option value="moose-25">Moose 25</option>
-    </select>
-</div>
-<div class="form-group">
-    <label>New Trip ID:</label>
-    <input type="text" id="newTripId" placeholder="e.g., moose-26">
-</div>
-<button onclick="cloneTrip()">Clone Trip</button>
-
+        <div class="form-group">
+            <label>Select Trip to Clone:</label>
+            <select id="tripToClone">
+                <option value="">Choose a past trip...</option>
+                <option value="moose-20">Moose 2020</option>
+                <option value="moose-22">Moose 22</option>
+                <option value="moose-23">Moose 23</option>
+                <option value="moose-24">Moose 24</option>
+                <option value="moose-25">Moose 25</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>New Trip ID:</label>
+            <input type="text" id="newTripId" placeholder="e.g., moose-26">
+        </div>
+        <button onclick="cloneTrip()">Clone Trip</button>
+        </div>
 
     <script>
         const API = window.location.origin;
