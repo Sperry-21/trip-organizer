@@ -123,6 +123,7 @@
         const API = window.location.origin;
         let currentTripId = 'moose-25';
         let families = [];
+        let window.currentMeals = [];
 
         document.addEventListener('DOMContentLoaded', () => {
             loadFamilies();
@@ -273,11 +274,89 @@
             document.getElementById('completedItems').textContent = items.filter(i => i.completed).length;
         }
 
-        function generateMealCalendar() {
-            const startDate = new Date(document.getElementById('mealStartDate').value);
-            const cal = document.getElementById('mealCalendar');
-            cal.innerHTML = '<p>Meal calendar feature coming soon!</p>';
-        }
+async function generateMealCalendar() {
+    const startDate = new Date(document.getElementById('mealStartDate').value);
+    const days = 7; // Show a week
+    
+    let html = '<div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; margin-top: 20px;">';
+    
+    // Header with day names
+    ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].forEach(day => {
+        html += `<div style="text-align: center; font-weight: bold; padding: 10px; background: #f0f0f0; border-radius: 4px;">${day}</div>`;
+    });
+    
+    // Calendar days
+    const startDay = startDate.getDay();
+    for (let i = 0; i < startDay; i++) html += '<div></div>';
+    
+    for (let i = 0; i < days; i++) {
+        const date = new Date(startDate);
+        date.setDate(date.getDate() + i);
+        const dateStr = date.toISOString().split('T')[0];
+        const dayMeals = window.currentMeals?.filter(m => m.meal_date === dateStr) || [];
+        
+        html += `
+            <div style="border: 1px solid #ddd; border-radius: 4px; padding: 10px; min-height: 150px; cursor: pointer;" onclick="openMealForm('${dateStr}')">
+                <div style="font-weight: bold; margin-bottom: 10px;">${date.getDate()}</div>
+                ${dayMeals.map(m => `
+                    <div style="background: ${m.color || '#4a90e2'}; color: white; padding: 6px; border-radius: 3px; margin-bottom: 5px; font-size: 12px;">
+                        <strong>${m.meal_time}</strong><br>${m.family_name || 'Unassigned'}
+                    </div>
+                `).join('')}
+                <button style="font-size: 12px; padding: 4px 8px; margin-top: 5px;">+ Add Meal</button>
+            </div>
+        `;
+    }
+    
+    html += '</div>';
+    document.getElementById('mealCalendar').innerHTML = html;
+    window.currentMeals = await fetchMeals();
+}
+
+async function fetchMeals() {
+    try {
+        const res = await fetch(`${API}/api/trips/${currentTripId}/meals`);
+        return await res.json();
+    } catch (e) {
+        console.error(e);
+        return [];
+    }
+}
+
+function openMealForm(dateStr) {
+    const time = prompt('Time (Breakfast, Lunch, Dinner):');
+    if (!time) return;
+    
+    const familyName = prompt('Family name:');
+    if (!familyName) return;
+    
+    const family = families.find(f => f.name === familyName);
+    if (!family) {
+        alert('Family not found');
+        return;
+    }
+    
+    saveMeal(dateStr, time, family.id);
+}
+
+async function saveMeal(dateStr, time, familyId) {
+    try {
+        await fetch(`${API}/api/trips/${currentTripId}/meals`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                meal_date: dateStr,
+                meal_time: time,
+                meal_name: null,
+                family_id: familyId,
+                description: null
+            })
+        });
+        generateMealCalendar();
+    } catch (e) {
+        alert('Error saving meal');
+    }
+}
     </script>
 </body>
 </html>
