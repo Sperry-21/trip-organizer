@@ -214,13 +214,15 @@
     });
 }
 
-async function deleteFamily(id) {
-    if (!confirm('Delete this family?')) return;
-    // For now, just remove from local array since we don't have a backend delete
-    families = families.filter(f => f.id !== id);
-    updateFamiliesList();
-    loadFamilies(); // Refresh from server
-}
+        async function deleteFamily(id) {
+            if (!confirm('Delete this family?')) return;
+            try {
+                await fetch(`${API}/api/families/${id}`, { method: 'DELETE' });
+                loadFamilies();
+            } catch (e) {
+                alert('Error deleting family');
+            }
+        }
 
         async function addFamily() {
             const name = document.getElementById('familyName').value.trim();

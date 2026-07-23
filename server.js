@@ -49,6 +49,17 @@ app.post('/api/families', async (req, res) => {
   }
 });
 
+app.delete('/api/families/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    await sql`DELETE FROM families WHERE id = ${id}`;
+    res.json({ success: true });
+  } catch (err) {
+    console.error('Error:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 app.get('/api/trips/:tripId/items', async (req, res) => {
   try {
     const { tripId } = req.params;
