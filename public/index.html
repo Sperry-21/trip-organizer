@@ -128,7 +128,7 @@
             loadFamilies();
             loadItems();
             document.getElementById('mealStartDate').valueAsDate = new Date();
-            setInterval(() => { loadItems(); loadFamilies(); }, 2000);
+            setInterval(() => { loadItems(); }, 2000);
         });
 
         function switchTab(tab, btn) {
