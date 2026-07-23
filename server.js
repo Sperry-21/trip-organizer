@@ -16,13 +16,15 @@ async function initDb() {
     await sql`CREATE TABLE IF NOT EXISTS families (id SERIAL PRIMARY KEY, name VARCHAR(255) NOT NULL UNIQUE, color VARCHAR(7) DEFAULT '#4a90e2', created_at TIMESTAMP DEFAULT NOW());`;
     await sql`CREATE TABLE IF NOT EXISTS trip_items (id BIGINT PRIMARY KEY, trip_id VARCHAR(255) NOT NULL, person VARCHAR(255) NOT NULL, item VARCHAR(255) NOT NULL, category VARCHAR(255) NOT NULL, notes TEXT, completed BOOLEAN DEFAULT false, created_at TIMESTAMP DEFAULT NOW());`;
     await sql`CREATE TABLE IF NOT EXISTS trip_meals (id SERIAL PRIMARY KEY, trip_id VARCHAR(255) NOT NULL, meal_date DATE NOT NULL, meal_time VARCHAR(50), meal_name VARCHAR(255), family_id INTEGER REFERENCES families(id), description TEXT, created_at TIMESTAMP DEFAULT NOW());`;
-    
+    await sql`CREATE TABLE IF NOT EXISTS trips (id SERIAL PRIMARY KEY,  trip_id VARCHAR(255) UNIQUE NOT NULL,  name VARCHAR(255),  created_at TIMESTAMP DEFAULT NOW()
+)`;
+
     const defaultFamilies = ['Castellot', 'Fallavollita', 'Perry', "O'Connell", 'Ava', 'Hallett', '2Paulz', 'Pete'];
     const colors = ['#667eea', '#764ba2', '#f093fb', '#4facfe', '#00f2fe', '#43e97b', '#fa709a', '#fee140'];
     for (let i = 0; i < defaultFamilies.length; i++) {
       try {
         await sql`INSERT INTO families (name, color) VALUES (${defaultFamilies[i]}, ${colors[i]}) ON CONFLICT DO NOTHING`;
-      } catch (e) {}
+      } catch (e) { }
     }
   } catch (err) {
     console.error('DB init error:', err.message);
@@ -62,7 +64,7 @@ app.delete('/api/families/:id', async (req, res) => {
 
 app.get('/api/trips', async (req, res) => {
   try {
-    const result = await sql`SELECT DISTINCT trip_id FROM trip_items ORDER BY trip_id DESC`;
+    const result = await sql`SELECT trip_id FROM trips ORDER BY created_at DESC`;
     res.json(result.rows.map(r => r.trip_id));
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -73,11 +75,10 @@ app.post('/api/trips', async (req, res) => {
   try {
     const { tripId } = req.body;
     if (!tripId) return res.status(400).json({ error: 'tripId required' });
-    
-    // Just inserting a marker item to create the trip
-    await sql`INSERT INTO trip_items (trip_id, person, item, category, created_at) 
-              VALUES (${tripId}, 'Setup', 'Trip created', 'Logistics', NOW())`;
-    
+
+    // Insert into trips table
+    await sql`INSERT INTO trips (trip_id, name) VALUES (${tripId}, ${tripId})`;
+
     res.json({ success: true, tripId });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -88,6 +89,7 @@ app.delete('/api/trips/:tripId', async (req, res) => {
   try {
     const { tripId } = req.params;
     await sql`DELETE FROM trip_items WHERE trip_id = ${tripId}`;
+    await sql`DELETE FROM trips WHERE trip_id = ${tripId}`;
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
