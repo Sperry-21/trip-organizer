@@ -256,7 +256,11 @@
             </div>
             <div class="form-group">
                 <label>Color:</label>
-                <input type="color" id="familyColor" value="#4a90e2">
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <input type="color" id="familyColor" value="#4a90e2"
+                        style="width: 60px; height: 40px; cursor: pointer; border: 2px solid #ddd; border-radius: 4px;">
+                    <span id="colorHex" style="font-family: monospace; font-size: 14px;">#4a90e2</span>
+                </div>
             </div>
             <button onclick="addFamily()">Add Family</button>
             <div id="familiesList" style="margin-top: 20px;"></div>
@@ -293,6 +297,20 @@
         let currentMeals = [];
 
         document.addEventListener('DOMContentLoaded', () => {
+            loadFamilies();
+            loadLogistics();
+            loadItems();
+            loadAllTrips();
+            loadTripsForCloning();
+            document.getElementById('mealStartDate').valueAsDate = new Date();
+            setInterval(() => { loadItems(); }, 3000);
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('familyColor').addEventListener('change', (e) => {
+                document.getElementById('colorHex').textContent = e.target.value.toUpperCase();
+            });
+
             loadFamilies();
             loadLogistics();
             loadItems();
