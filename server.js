@@ -60,6 +60,40 @@ app.delete('/api/families/:id', async (req, res) => {
   }
 });
 
+app.get('/api/trips', async (req, res) => {
+  try {
+    const result = await sql`SELECT DISTINCT trip_id FROM trip_items ORDER BY trip_id DESC`;
+    res.json(result.rows.map(r => r.trip_id));
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/trips', async (req, res) => {
+  try {
+    const { tripId } = req.body;
+    if (!tripId) return res.status(400).json({ error: 'tripId required' });
+    
+    // Just inserting a marker item to create the trip
+    await sql`INSERT INTO trip_items (trip_id, person, item, category, created_at) 
+              VALUES (${tripId}, 'Setup', 'Trip created', 'Logistics', NOW())`;
+    
+    res.json({ success: true, tripId });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.delete('/api/trips/:tripId', async (req, res) => {
+  try {
+    const { tripId } = req.params;
+    await sql`DELETE FROM trip_items WHERE trip_id = ${tripId}`;
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 app.get('/api/trips/:tripId/items', async (req, res) => {
   try {
     const { tripId } = req.params;

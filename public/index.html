@@ -169,9 +169,11 @@
 
         <div class="trip-selector">
             <label>Trip ID:</label>
-            <input type="text" id="tripId" value="moose-25" style="width: 200px;">
-            <button onclick="switchTrip()">Switch Trip</button>
+            <select id="tripSelect" onchange="switchTripFromSelect()" style="width: 200px;">
+                <option value="moose-25">moose-25</option>
+            </select>
             <button onclick="createNewTrip()" style="background: #27ae60; margin-left: 10px;">+ New Trip</button>
+            <button onclick="deleteCurrentTrip()" style="background: #e74c3c;">Delete Trip</button>
             <span id="syncStatus">Syncing...</span>
         </div>
 
@@ -296,6 +298,7 @@
             loadFamilies();
             loadLogistics();
             loadItems();
+            loadAllTrips();
             document.getElementById('mealStartDate').valueAsDate = new Date();
             setInterval(() => { loadItems(); }, 3000);
         });
@@ -637,6 +640,72 @@
             loadLogistics();
             alert(`✅ Created trip: ${currentTripId}`);
         }
+
+        async function loadAllTrips() {
+            try {
+                const res = await fetch(`${API}/api/trips`);
+                const trips = await res.json();
+                const select = document.getElementById('tripSelect');
+                select.innerHTML = '';
+                trips.forEach(trip => {
+                    const opt = document.createElement('option');
+                    opt.value = trip;
+                    opt.textContent = trip;
+                    select.appendChild(opt);
+                });
+                if (trips.length === 0) {
+                    const opt = document.createElement('option');
+                    opt.value = 'moose-25';
+                    opt.textContent = 'moose-25';
+                    select.appendChild(opt);
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        function switchTripFromSelect() {
+            currentTripId = document.getElementById('tripSelect').value;
+            loadItems();
+            loadLogistics();
+        }
+
+        async function createNewTrip() {
+            const newId = prompt('Enter new trip ID (e.g., moose-26):');
+            if (!newId) return;
+
+            try {
+                await fetch(`${API}/api/trips`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ tripId: newId.trim() })
+                });
+
+                currentTripId = newId.trim();
+                await loadAllTrips();
+                document.getElementById('tripSelect').value = currentTripId;
+                loadItems();
+                alert(`✅ Created trip: ${currentTripId}`);
+            } catch (e) {
+                alert('Error creating trip');
+            }
+        }
+
+        async function deleteCurrentTrip() {
+            if (!confirm(`Delete trip "${currentTripId}"? This cannot be undone.`)) return;
+
+            try {
+                await fetch(`${API}/api/trips/${currentTripId}`, { method: 'DELETE' });
+                alert(`Deleted ${currentTripId}`);
+                currentTripId = 'moose-25';
+                await loadAllTrips();
+                document.getElementById('tripSelect').value = currentTripId;
+                loadItems();
+            } catch (e) {
+                alert('Error deleting trip');
+            }
+        }
+
 
     </script>
 </body>
