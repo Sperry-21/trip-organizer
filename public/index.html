@@ -93,7 +93,7 @@
                 </div>
             </div>
 
-            <h2>Checklist</h2>
+            <h2>Who's got what?</h2>
             <div id="checklist" class="checklist"></div>
         </div>
 
@@ -259,22 +259,11 @@ function renderChecklist(items) {
         grouped[item.category].push(item);
     });
     
-    let html = '';
+    let html = '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">';
     Object.entries(grouped).forEach(([category, categoryItems]) => {
-        html += `<div style="margin-bottom: 25px;">
-            <h3 style="background: #f0f0f0; padding: 10px; border-radius: 4px; margin-bottom: 10px;">${category} (${categoryItems.length})</h3>
+        html += `<div>
+            <h3 style="background: #f0f0f0; padding: 10px; border-radius: 4px; margin-bottom: 10px;">${category}</h3>
             <div>`;
-        
-        categoryItems.forEach(item => {
-            html += `<div class="item ${item.completed ? 'completed' : ''}" style="margin-bottom: 8px;">
-                <input type="checkbox" ${item.completed ? 'checked' : ''} onchange="toggleItem(${item.id})">
-                <div style="flex: 1;">
-                    <strong>${item.item}</strong> — <em>${item.person}</em>
-                    ${item.notes ? `<br><small style="color: #999;">📌 ${item.notes}</small>` : ''}
-                </div>
-                <button style="background: #e74c3c; padding: 5px 10px; font-size: 12px;" onclick="deleteItem(${item.id})">Delete</button>
-            </div>`;
-        });
         
         html += '</div></div>';
     });
