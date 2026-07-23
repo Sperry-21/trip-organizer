@@ -28,15 +28,17 @@
         .item { background: #f9f9f9; padding: 15px; margin: 10px 0; border-radius: 4px; display: flex; gap: 10px; align-items: center; }
         .item input { width: auto; }
         .item.completed { opacity: 0.6; }
+        #logisticsBanner { background: #fff3cd; border: 1px solid #ffc107; border-radius: 4px; padding: 15px; margin-bottom: 20px; display: none; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🏕️ Moose Lake </h1>
-        <p>When I say moose.......</p>
-        <div id="logisticsBanner" style="background: #fff3cd; border: 1px solid #ffc107; border-radius: 4px; padding: 15px; margin-bottom: 20px; display: none;">
-    <strong>📋 Logistics:</strong> <span id="logisticsText"></span>
-</div>
+        <div id="logisticsBanner">
+            <strong>📋 Logistics:</strong> <span id="logisticsText"></span>
+        </div>
+
+        <h1>🏕️ Group Trip Organizer</h1>
+        <p>Live shared coordination for group trips.</p>
         
         <div class="trip-selector">
             <label>Trip ID:</label>
@@ -51,6 +53,7 @@
             <button class="tab-btn" onclick="switchTab('admin', this)">⚙️ Admin</button>
         </div>
 
+        <!-- ITEMS TAB -->
         <div id="items" class="tab-content active">
             <h2>Add Item</h2>
             <div class="form-group">
@@ -97,20 +100,22 @@
             <div id="checklist" class="checklist"></div>
         </div>
 
-<div id="meals" class="tab-content">
-    <h2>Meal Calendar</h2>
-    <div class="form-group">
-        <label>Start Date:</label>
-        <input type="date" id="mealStartDate">
-    </div>
-    <div class="form-group">
-        <label>Number of Days:</label>
-        <input type="number" id="mealDays" value="7" min="1" max="30">
-    </div>
-    <button onclick="generateMealCalendar()">Generate Calendar</button>
-    <div id="mealCalendar"></div>
-</div>
+        <!-- MEALS TAB -->
+        <div id="meals" class="tab-content">
+            <h2>Meal Calendar</h2>
+            <div class="form-group">
+                <label>Start Date:</label>
+                <input type="date" id="mealStartDate">
+            </div>
+            <div class="form-group">
+                <label>Number of Days:</label>
+                <input type="number" id="mealDays" value="7" min="1" max="30">
+            </div>
+            <button onclick="generateMealCalendar()">Generate Calendar</button>
+            <div id="mealCalendar"></div>
+        </div>
 
+        <!-- ADMIN TAB -->
         <div id="admin" class="tab-content">
             <h2>Manage Families</h2>
             <div class="form-group">
@@ -123,32 +128,34 @@
             </div>
             <button onclick="addFamily()">Add Family</button>
             <div id="familiesList" style="margin-top: 20px;"></div>
+
             <h2 style="margin-top: 40px;">Trip Logistics</h2>
-        <div class="form-group">
-            <label>Logistics Notes:</label>
-            <textarea id="logisticsInput" rows="4" placeholder="e.g., Meet at parking lot at 9am, bring cash for tolls..."></textarea>
+            <div class="form-group">
+                <label>Logistics Notes:</label>
+                <textarea id="logisticsInput" rows="4" placeholder="e.g., Meet at parking lot at 9am, bring cash for tolls..."></textarea>
+            </div>
+            <button onclick="saveLogistics()">Save Logistics</button>
+
+            <h2 style="margin-top: 40px;">Clone Past Trip</h2>
+            <div class="form-group">
+                <label>Select Trip to Clone:</label>
+                <select id="tripToClone">
+                    <option value="">Choose a past trip...</option>
+                    <option value="moose-20">Moose 2020</option>
+                    <option value="moose-22">Moose 22</option>
+                    <option value="moose-23">Moose 23</option>
+                    <option value="moose-24">Moose 24</option>
+                    <option value="moose-25">Moose 25</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>New Trip ID:</label>
+                <input type="text" id="newTripId" placeholder="e.g., moose-26">
+            </div>
+            <button onclick="cloneTrip()">Clone Trip</button>
         </div>
-        <button onclick="saveLogistics()">Save Logistics</button>
-       </div>
-        <h2 style="margin-top: 40px;">Clone Past Trip</h2>
-        <div class="form-group">
-            <label>Select Trip to Clone:</label>
-            <select id="tripToClone">
-                <option value="">Choose a past trip...</option>
-                <option value="moose-20">Moose 2020</option>
-                <option value="moose-22">Moose 22</option>
-                <option value="moose-23">Moose 23</option>
-                <option value="moose-24">Moose 24</option>
-                <option value="moose-25">Moose 25</option>
-            </select>
-        </div>
-        <div class="form-group">
-            <label>New Trip ID:</label>
-            <input type="text" id="newTripId" placeholder="e.g., moose-26">
-        </div>
-        <button onclick="cloneTrip()">Clone Trip</button>
-        </div>
-</div>
+    </div>
+
     <script>
         const API = window.location.origin;
         let currentTripId = 'moose-25';
@@ -197,48 +204,38 @@
             } catch (e) { console.error(e); }
         }
 
-     function updateFamiliesList() {
-    const list = document.getElementById('familiesList');
-    list.innerHTML = '<h3>Current Families:</h3>';
-    families.forEach(f => {
-        const div = document.createElement('div');
-        div.style.display = 'inline-flex';
-        div.style.alignItems = 'center';
-        div.style.background = f.color;
-        div.style.color = 'white';
-        div.style.padding = '8px 12px';
-        div.style.borderRadius = '20px';
-        div.style.margin = '5px';
-        div.style.gap = '8px';
-        
-        const nameSpan = document.createElement('span');
-        nameSpan.textContent = f.name;
-        div.appendChild(nameSpan);
-        
-        const deleteBtn = document.createElement('button');
-        deleteBtn.textContent = '✕';
-        deleteBtn.style.background = 'rgba(255,255,255,0.3)';
-        deleteBtn.style.color = 'white';
-        deleteBtn.style.border = 'none';
-        deleteBtn.style.padding = '2px 6px';
-        deleteBtn.style.borderRadius = '50%';
-        deleteBtn.style.cursor = 'pointer';
-        deleteBtn.style.fontSize = '16px';
-        deleteBtn.onclick = () => deleteFamily(f.id);
-        div.appendChild(deleteBtn);
-        
-        list.appendChild(div);
-    });
-}
-
-        async function deleteFamily(id) {
-            if (!confirm('Delete this family?')) return;
-            try {
-                await fetch(`${API}/api/families/${id}`, { method: 'DELETE' });
-                loadFamilies();
-            } catch (e) {
-                alert('Error deleting family');
-            }
+        function updateFamiliesList() {
+            const list = document.getElementById('familiesList');
+            list.innerHTML = '<h3>Current Families:</h3>';
+            families.forEach(f => {
+                const div = document.createElement('div');
+                div.style.display = 'inline-flex';
+                div.style.alignItems = 'center';
+                div.style.background = f.color;
+                div.style.color = 'white';
+                div.style.padding = '8px 12px';
+                div.style.borderRadius = '20px';
+                div.style.margin = '5px';
+                div.style.gap = '8px';
+                
+                const nameSpan = document.createElement('span');
+                nameSpan.textContent = f.name;
+                div.appendChild(nameSpan);
+                
+                const deleteBtn = document.createElement('button');
+                deleteBtn.textContent = '✕';
+                deleteBtn.style.background = 'rgba(255,255,255,0.3)';
+                deleteBtn.style.color = 'white';
+                deleteBtn.style.border = 'none';
+                deleteBtn.style.padding = '2px 6px';
+                deleteBtn.style.borderRadius = '50%';
+                deleteBtn.style.cursor = 'pointer';
+                deleteBtn.style.fontSize = '16px';
+                deleteBtn.onclick = () => deleteFamily(f.id);
+                div.appendChild(deleteBtn);
+                
+                list.appendChild(div);
+            });
         }
 
         async function addFamily() {
@@ -254,6 +251,16 @@
                 loadFamilies();
                 document.getElementById('familyName').value = '';
             } catch (e) { alert('Error adding family'); }
+        }
+
+        async function deleteFamily(id) {
+            if (!confirm('Delete this family?')) return;
+            try {
+                await fetch(`${API}/api/families/${id}`, { method: 'DELETE' });
+                loadFamilies();
+            } catch (e) {
+                alert('Error deleting family');
+            }
         }
 
         async function loadItems() {
@@ -289,32 +296,43 @@
             } catch (e) { alert('Error adding item'); }
         }
 
-function renderChecklist(items) {
-    const container = document.getElementById('checklist');
-    if (items.length === 0) {
-        container.innerHTML = '<p>No items yet. Add something above!</p>';
-        return;
-    }
-    
-    const grouped = {};
-    items.forEach(item => {
-        if (!grouped[item.category]) {
-            grouped[item.category] = [];
+        function renderChecklist(items) {
+            const container = document.getElementById('checklist');
+            if (items.length === 0) {
+                container.innerHTML = '<p>No items yet. Add something above!</p>';
+                return;
+            }
+            
+            const grouped = {};
+            items.forEach(item => {
+                if (!grouped[item.category]) {
+                    grouped[item.category] = [];
+                }
+                grouped[item.category].push(item);
+            });
+            
+            let html = '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">';
+            Object.entries(grouped).forEach(([category, categoryItems]) => {
+                html += `<div>
+                    <h3 style="background: #f0f0f0; padding: 10px; border-radius: 4px; margin-bottom: 10px;">${category}</h3>
+                    <div>`;
+                
+                categoryItems.forEach(item => {
+                    html += `<div style="background: #f9f9f9; padding: 10px; margin-bottom: 8px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <strong>${item.item}</strong> — <em>${item.person}</em>
+                            ${item.notes ? `<br><small style="color: #999;">📌 ${item.notes}</small>` : ''}
+                        </div>
+                        <button style="background: #e74c3c; padding: 5px 10px; font-size: 12px;" onclick="deleteItem(${item.id})">Delete</button>
+                    </div>`;
+                });
+                
+                html += '</div></div>';
+            });
+            html += '</div>';
+            
+            container.innerHTML = html;
         }
-        grouped[item.category].push(item);
-    });
-    
-    let html = '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">';
-    Object.entries(grouped).forEach(([category, categoryItems]) => {
-        html += `<div>
-            <h3 style="background: #f0f0f0; padding: 10px; border-radius: 4px; margin-bottom: 10px;">${category}</h3>
-            <div>`;
-        
-        html += '</div></div>';
-    });
-    
-    container.innerHTML = html;
-}
 
         async function toggleItem(id) {
             const items = window.currentItems || [];
@@ -343,6 +361,25 @@ function renderChecklist(items) {
             document.getElementById('totalItems').textContent = items.length;
             document.getElementById('uniquePeople').textContent = new Set(items.map(i => i.person)).size;
             document.getElementById('completedItems').textContent = items.filter(i => i.completed).length;
+        }
+
+        function loadLogistics() {
+            const text = localStorage.getItem(`logistics-${currentTripId}`);
+            if (text) {
+                document.getElementById('logisticsText').textContent = text;
+                document.getElementById('logisticsBanner').style.display = 'block';
+                document.getElementById('logisticsInput').value = text;
+            } else {
+                document.getElementById('logisticsBanner').style.display = 'none';
+            }
+        }
+
+        function saveLogistics() {
+            const text = document.getElementById('logisticsInput').value.trim();
+            if (!text) return alert('Enter logistics notes');
+            localStorage.setItem(`logistics-${currentTripId}`, text);
+            loadLogistics();
+            alert('Logistics saved!');
         }
 
         async function generateMealCalendar() {
@@ -427,57 +464,38 @@ function renderChecklist(items) {
                 alert('Error saving meal');
             }
         }
-        function loadLogistics() {
-    const text = localStorage.getItem(`logistics-${currentTripId}`);
-    if (text) {
-        document.getElementById('logisticsText').textContent = text;
-        document.getElementById('logisticsBanner').style.display = 'block';
-        document.getElementById('logisticsInput').value = text;
-    } else {
-        document.getElementById('logisticsBanner').style.display = 'none';
-    }
-}
 
-function saveLogistics() {
-    const text = document.getElementById('logisticsInput').value.trim();
-    if (!text) return alert('Enter logistics notes');
-    localStorage.setItem(`logistics-${currentTripId}`, text);
-    loadLogistics();
-    alert('Logistics saved!');
-}
-
-async function cloneTrip() {
-    const sourceTrip = document.getElementById('tripToClone').value;
-    const newTrip = document.getElementById('newTripId').value.trim();
-    
-    if (!sourceTrip || !newTrip) return alert('Select a trip and enter new trip ID');
-    
-    try {
-        const res = await fetch(`${API}/api/trips/${sourceTrip}/items`);
-        const items = await res.json();
-        
-        for (const item of items) {
-            await fetch(`${API}/api/trips/${newTrip}/items`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    id: Date.now() + Math.random(),
-                    person: item.person,
-                    item: item.item,
-                    category: item.category,
-                    notes: item.notes
-                })
-            });
+        async function cloneTrip() {
+            const sourceTrip = document.getElementById('tripToClone').value;
+            const newTrip = document.getElementById('newTripId').value.trim();
+            
+            if (!sourceTrip || !newTrip) return alert('Select a trip and enter new trip ID');
+            
+            try {
+                const res = await fetch(`${API}/api/trips/${sourceTrip}/items`);
+                const items = await res.json();
+                
+                for (const item of items) {
+                    await fetch(`${API}/api/trips/${newTrip}/items`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            id: Date.now() + Math.random(),
+                            person: item.person,
+                            item: item.item,
+                            category: item.category,
+                            notes: item.notes
+                        })
+                    });
+                }
+                
+                alert(`Cloned ${items.length} items to ${newTrip}!`);
+                document.getElementById('newTripId').value = '';
+                document.getElementById('tripToClone').value = '';
+            } catch (e) {
+                alert('Error cloning trip');
+            }
         }
-        
-        alert(`Cloned ${items.length} items to ${newTrip}!`);
-        document.getElementById('newTripId').value = '';
-        document.getElementById('tripToClone').value = '';
-    } catch (e) {
-        alert('Error cloning trip');
-    }
-}
-
     </script>
 </body>
 </html>
