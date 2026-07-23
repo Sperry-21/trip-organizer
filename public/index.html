@@ -271,9 +271,12 @@
             <h2 style="margin-top: 40px;">Clone Past Trip</h2>
             <div class="form-group">
                 <label>Select Trip to Clone:</label>
-                <select id="tripToClone">
-                    <option value="">Choose a past trip...</option>
-                </select>
+                <div style="display: flex; gap: 10px;">
+                    <select id="tripToClone" style="flex: 1;">
+                        <option value="">Choose a past trip...</option>
+                    </select>
+                    <button onclick="loadTripsForCloning()" style="padding: 10px 15px;">↻ Refresh</button>
+                </div>
             </div>
             <div class="form-group">
                 <label>New Trip ID:</label>
@@ -304,6 +307,12 @@
             document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
             document.getElementById(tab).classList.add('active');
             if (btn) btn.classList.add('active');
+
+            // Refresh trip lists when switching to Admin tab
+            if (tab === 'admin') {
+                loadAllTrips();
+                loadTripsForCloning();
+            }
         }
 
         function switchTrip() {
