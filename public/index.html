@@ -245,6 +245,20 @@
             </div>
             <button onclick="generateMealCalendar()">Generate Calendar</button>
             <div id="mealCalendar"></div>
+            <div id="mealCalendar"></div>
+
+            <h2 style="margin-top: 40px;">Other Stuff by Family</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-top: 20px;"
+                id="otherStuffColumns"></div>
+            <div style="margin-top: 20px;">
+                <label>Add to Family:</label>
+                <select id="otherStuffFamily" style="width: 200px;">
+                    <option value="">Select family...</option>
+                </select>
+                <input type="text" id="otherStuffItem" placeholder="Item to add"
+                    style="width: 300px; margin-left: 10px;">
+                <button onclick="addOtherStuff()" style="margin-left: 10px;">Add</button>
+            </div>
         </div>
 
         <!-- ADMIN TAB -->
@@ -326,10 +340,12 @@
             document.getElementById(tab).classList.add('active');
             if (btn) btn.classList.add('active');
 
-            // Refresh trip lists when switching to Admin tab
             if (tab === 'admin') {
                 loadAllTrips();
                 loadTripsForCloning();
+            }
+            if (tab === 'meals') {
+                loadOtherStuff();
             }
         }
 
@@ -349,11 +365,20 @@
                 const select = document.getElementById('person');
                 const current = select.value;
                 select.innerHTML = '<option>Select family...</option>';
+
+                const otherSelect = document.getElementById('otherStuffFamily');
+                otherSelect.innerHTML = '<option value="">Select family...</option>';
+
                 families.forEach(f => {
                     const opt = document.createElement('option');
                     opt.value = f.name;
                     opt.textContent = f.name;
                     select.appendChild(opt);
+
+                    const opt2 = document.createElement('option');
+                    opt2.value = f.id;
+                    opt2.textContent = f.name;
+                    otherSelect.appendChild(opt2);
                 });
                 if (current && current !== 'Select family...') select.value = current;
                 updateFamiliesList();
@@ -743,6 +768,88 @@
                 });
             } catch (e) {
                 console.error(e);
+            }
+        }
+
+        async function loadOtherStuff() {
+            try {
+                const res = await fetch(`${API}/api/trips/${currentTripId}/other-stuff`);
+                const items = await res.json();
+                renderOtherStuffColumns(items);
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        function renderOtherStuffColumns(items) {
+            const container = document.getElementById('otherStuffColumns');
+
+            // Group by family
+            const byFamily = {};
+            families.forEach(f => {
+                byFamily[f.id] = { name: f.name, color: f.color, items: [] };
+            });
+
+            items.forEach(item => {
+                if (byFamily[item.family_id]) {
+                    byFamily[item.family_id].items.push(item);
+                }
+            });
+
+            // Render columns
+            let html = '';
+            Object.entries(byFamily).forEach(([familyId, data]) => {
+                html += `
+            <div style="background: #f9f9f9; border-left: 4px solid ${data.color}; padding: 15px; border-radius: 4px;">
+                <h3 style="color: ${data.color}; margin-bottom: 10px;">${data.name}</h3>
+                <ul style="margin: 0; padding-left: 20px;">
+        `;
+
+                data.items.forEach(item => {
+                    html += `
+                <li style="margin-bottom: 8px;">
+                    ${item.item}
+                    <button onclick="deleteOtherStuff(${item.id})" style="background: #e74c3c; padding: 2px 6px; font-size: 12px; margin-left: 5px;">✕</button>
+                </li>
+            `;
+                });
+
+                html += `
+                </ul>
+            </div>
+        `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        async function addOtherStuff() {
+            const familyId = document.getElementById('otherStuffFamily').value;
+            const item = document.getElementById('otherStuffItem').value.trim();
+
+            if (!familyId || !item) return alert('Select family and enter item');
+
+            try {
+                await fetch(`${API}/api/trips/${currentTripId}/other-stuff`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ familyId, item })
+                });
+
+                document.getElementById('otherStuffItem').value = '';
+                loadOtherStuff();
+            } catch (e) {
+                alert('Error adding item');
+            }
+        }
+
+        async function deleteOtherStuff(id) {
+            if (!confirm('Delete?')) return;
+            try {
+                await fetch(`${API}/api/trips/${currentTripId}/other-stuff/${id}`, { method: 'DELETE' });
+                loadOtherStuff();
+            } catch (e) {
+                alert('Error deleting');
             }
         }
 
