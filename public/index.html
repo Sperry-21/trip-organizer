@@ -273,11 +273,6 @@
                 <label>Select Trip to Clone:</label>
                 <select id="tripToClone">
                     <option value="">Choose a past trip...</option>
-                    <option value="moose-20">Moose 2020</option>
-                    <option value="moose-22">Moose 22</option>
-                    <option value="moose-23">Moose 23</option>
-                    <option value="moose-24">Moose 24</option>
-                    <option value="moose-25">Moose 25</option>
                 </select>
             </div>
             <div class="form-group">
@@ -299,6 +294,7 @@
             loadLogistics();
             loadItems();
             loadAllTrips();
+            loadTripsForCloning();
             document.getElementById('mealStartDate').valueAsDate = new Date();
             setInterval(() => { loadItems(); }, 3000);
         });
@@ -706,6 +702,22 @@
             }
         }
 
+        async function loadTripsForCloning() {
+            try {
+                const res = await fetch(`${API}/api/trips`);
+                const trips = await res.json();
+                const select = document.getElementById('tripToClone');
+                select.innerHTML = '<option value="">Choose a past trip...</option>';
+                trips.forEach(trip => {
+                    const opt = document.createElement('option');
+                    opt.value = trip;
+                    opt.textContent = trip;
+                    select.appendChild(opt);
+                });
+            } catch (e) {
+                console.error(e);
+            }
+        }
 
     </script>
 </body>
