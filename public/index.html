@@ -542,9 +542,18 @@
 
         <!-- Meals Tab -->
         <div id="meals" class="content active">
-            <div class="calendar-controls">
-                <input type="date" id="mealDate" required>
-                <button onclick="addMealDay()">Add Day to Calendar</button>
+            <div style="background: #f9f9f9; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+                <div style="display: grid; gap: 15px;">
+                    <div>
+                        <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #333;">Start Date:</label>
+                        <input type="date" id="mealStartDate" style="padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; width: 100%; max-width: 250px;">
+                    </div>
+                    <div>
+                        <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #333;">Number of Days:</label>
+                        <input type="number" id="mealNumDays" value="7" min="1" max="30" style="padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; width: 100%; max-width: 250px;">
+                    </div>
+                    <button onclick="generateMealCalendar()" style="padding: 10px 20px; background: #667eea; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; width: 100%; max-width: 250px;">Generate Calendar</button>
+                </div>
             </div>
 
             <div id="mealCalendar" class="calendar-grid"></div>
@@ -886,6 +895,107 @@
             }
         }
 
+        function generateMealCalendar() {
+            const startDate = document.getElementById('mealStartDate').value;
+            const numDays = parseInt(document.getElementById('mealNumDays').value);
+
+            if (!startDate || !numDays) {
+                alert('Please enter start date and number of days');
+                return;
+            }
+
+            const calendar = document.getElementById('mealCalendar');
+            calendar.innerHTML = '';
+
+            const start = new Date(startDate);
+            const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+            // Header row
+            const headerRow = document.createElement('div');
+            headerRow.style.display = 'grid';
+            headerRow.style.gridTemplateColumns = 'repeat(7, 1fr)';
+            headerRow.style.gap = '10px';
+            headerRow.style.marginBottom = '15px';
+
+            daysOfWeek.forEach(day => {
+                const cell = document.createElement('div');
+                cell.textContent = day;
+                cell.style.fontWeight = 'bold';
+                cell.style.textAlign = 'center';
+                cell.style.padding = '10px';
+                cell.style.background = '#eee';
+                cell.style.borderRadius = '6px';
+                headerRow.appendChild(cell);
+            });
+
+            calendar.appendChild(headerRow);
+
+            // Calendar grid
+            const gridContainer = document.createElement('div');
+            gridContainer.style.display = 'grid';
+            gridContainer.style.gridTemplateColumns = 'repeat(7, 1fr)';
+            gridContainer.style.gap = '10px';
+
+            const firstDay = start.getDay();
+            // Empty cells before start date
+            for (let i = 0; i < firstDay; i++) {
+                const emptyCell = document.createElement('div');
+                gridContainer.appendChild(emptyCell);
+            }
+
+            // Date cells
+            for (let i = 0; i < numDays; i++) {
+                const currentDate = new Date(start);
+                currentDate.setDate(start.getDate() + i);
+
+                const cell = document.createElement('div');
+                cell.style.border = '1px solid #ddd';
+                cell.style.borderRadius = '8px';
+                cell.style.padding = '15px';
+                cell.style.minHeight = '120px';
+                cell.style.background = '#fafafa';
+                cell.style.display = 'flex';
+                cell.style.flexDirection = 'column';
+                cell.style.gap = '10px';
+
+                const dateStr = currentDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                const dateKey = currentDate.toISOString().split('T')[0];
+
+                const dateLabel = document.createElement('div');
+                dateLabel.textContent = dateStr;
+                dateLabel.style.fontWeight = 'bold';
+                dateLabel.style.fontSize = '16px';
+                cell.appendChild(dateLabel);
+
+                const addBtn = document.createElement('button');
+                addBtn.textContent = '+ Add Meal';
+                addBtn.style.padding = '8px 12px';
+                addBtn.style.background = '#4a90e2';
+                addBtn.style.color = 'white';
+                addBtn.style.border = 'none';
+                addBtn.style.borderRadius = '4px';
+                addBtn.style.cursor = 'pointer';
+                addBtn.style.fontSize = '13px';
+                addBtn.style.fontWeight = '600';
+                addBtn.onclick = () => openMealModal(dateKey);
+                cell.appendChild(addBtn);
+
+                gridContainer.appendChild(cell);
+            }
+
+            calendar.appendChild(gridContainer);
+        }
+
+        async function loadMeals() {
+            try {
+                const res = await fetch(`/api/trips/${currentTrip}/meals`);
+                const meals = await res.json();
+                renderMeals(meals);
+            } catch (err) {
+                console.error('Error loading meals:', err);
+            }
+        }
+
         function renderMeals(meals) {
             const calendar = document.getElementById('mealCalendar');
             calendar.innerHTML = '';
@@ -928,20 +1038,15 @@
             });
         }
 
-        function addMealDay() {
-            const dateInput = document.getElementById('mealDate').value;
-            if (!dateInput) {
-                alert('Please select a date');
-                return;
-            }
 
-            // Just trigger a reload to show the date if it's a new one
-            loadMeals();
-        }
 
-        function openMealModal(date, time, mealId = null) {
+        function openMealModal(date, time = null, mealId = null) {
             mealModalData = { date, mealId };
-            document.getElementById('modalMealTime').value = time;
+            if (time) {
+                document.getElementById('modalMealTime').value = time;
+            } else {
+                document.getElementById('modalMealTime').value = 'Breakfast';
+            }
             document.getElementById('modalMealFamily').value = '';
             document.getElementById('modalMealDescription').value = '';
             document.getElementById('mealModal').classList.add('active');
