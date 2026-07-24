@@ -542,20 +542,11 @@
 
         <!-- Meals Tab -->
         <div id="meals" class="content active">
-            <div style="background: #f9f9f9; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
-                <div style="display: grid; gap: 15px;">
-                    <div>
-                        <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #333;">Start Date:</label>
-                        <input type="date" id="mealStartDate" style="padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; width: 100%; max-width: 250px;">
-                    </div>
-                    <div>
-                        <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #333;">Number of Days:</label>
-                        <input type="number" id="mealNumDays" value="7" min="1" max="30" style="padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; width: 100%; max-width: 250px;">
-                    </div>
-                    <button onclick="generateMealCalendar()" style="padding: 10px 20px; background: #667eea; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; width: 100%; max-width: 250px;">Generate Calendar</button>
-                </div>
+            <div id="mealNoCalendar" style="text-align: center; padding: 40px; background: #f9f9f9; border-radius: 8px; margin: 20px;">
+                <div style="font-size: 18px; font-weight: 600; color: #333; margin-bottom: 10px;">📅 Calendar Not Generated</div>
+                <div style="color: #666; margin-bottom: 20px;">Go to the Admin tab to generate this trip's meal calendar</div>
+                <button onclick="switchTab('admin')" style="padding: 12px 24px; background: #667eea; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">Go to Admin</button>
             </div>
-
             <div id="mealCalendar" class="calendar-grid"></div>
         </div>
 
@@ -606,9 +597,11 @@
                 <h3>Create New Trip</h3>
                 <div class="admin-form">
                     <input type="text" id="newTripId" placeholder="Trip ID (e.g., moose-25)">
-                    <div id="newTripFamilies" style="display: flex; gap: 8px; flex-wrap: wrap; grid-column: 1 / -1;"></div>
-                    <button onclick="createNewTrip()" style="grid-column: 1 / -1;">Create Trip</button>
+                    <input type="date" id="newTripStartDate" placeholder="Start Date">
+                    <input type="number" id="newTripDays" value="7" min="1" max="30" placeholder="Number of Days">
                 </div>
+                <div id="newTripFamilies" style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 15px;"></div>
+                <button onclick="createNewTrip()" style="width: 100%; padding: 12px; background: #667eea; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; margin-bottom: 15px;">Create Trip</button>
             </div>
 
             <div class="admin-section">
@@ -626,23 +619,38 @@
     <!-- Meal Modal -->
     <div id="mealModal" class="modal">
         <div class="modal-content">
-            <div class="modal-header">Add/Edit Meal</div>
+            <div class="modal-header">Add Meal</div>
             <div class="modal-form">
                 <div class="form-group">
-                    <label>Time</label>
-                    <select id="modalMealTime">
-                        <option value="Breakfast">Breakfast</option>
-                        <option value="Lunch">Lunch</option>
-                        <option value="Dinner">Dinner</option>
-                    </select>
+                    <label>Date</label>
+                    <input type="text" id="modalMealDate" disabled style="background: #f5f5f5;">
+                </div>
+                <div class="form-group">
+                    <label>Meal Type</label>
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;">
+                        <button type="button" class="meal-type-btn" data-type="Breakfast" onclick="selectMealType('Breakfast')" style="padding: 10px; border: 2px solid #ddd; background: white; border-radius: 6px; cursor: pointer; font-weight: 600;">Breakfast</button>
+                        <button type="button" class="meal-type-btn" data-type="Lunch" onclick="selectMealType('Lunch')" style="padding: 10px; border: 2px solid #ddd; background: white; border-radius: 6px; cursor: pointer; font-weight: 600;">Lunch</button>
+                        <button type="button" class="meal-type-btn" data-type="Dinner" onclick="selectMealType('Dinner')" style="padding: 10px; border: 2px solid #ddd; background: white; border-radius: 6px; cursor: pointer; font-weight: 600;">Dinner</button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Meal Category</label>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                        <button type="button" class="meal-category-btn" data-category="Main Meal" onclick="selectMealCategory('Main Meal')" style="padding: 10px; border: 2px solid #4a90e2; background: #4a90e2; color: white; border-radius: 6px; cursor: pointer; font-weight: 600;">Main Meal</button>
+                        <button type="button" class="meal-category-btn" data-category="Kids Meal" onclick="selectMealCategory('Kids Meal')" style="padding: 10px; border: 2px solid #ddd; background: white; border-radius: 6px; cursor: pointer; font-weight: 600;">Kids Meal</button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>What's Being Prepared</label>
+                    <input type="text" id="modalMealName" placeholder="e.g., Spaghetti & Meatballs">
                 </div>
                 <div class="form-group">
                     <label>Family Cooking</label>
                     <select id="modalMealFamily" required></select>
                 </div>
                 <div class="form-group">
-                    <label>Meal Details</label>
-                    <textarea id="modalMealDescription" placeholder="What are you making? Any details..."></textarea>
+                    <label>Additional Notes</label>
+                    <textarea id="modalMealDescription" placeholder="Any allergies, sides, etc..."></textarea>
                 </div>
             </div>
             <div class="modal-footer">
@@ -653,10 +661,25 @@
     </div>
 
     <script>
-        let currentTrip = null;
-        let allFamilies = [];
-        let allTrips = [];
-        let mealModalData = { date: null, mealId: null };
+        let mealModalData = { date: null, mealId: null, mealTime: null, mealCategory: 'Main Meal' };
+
+        function selectMealType(type) {
+            mealModalData.mealTime = type;
+            document.querySelectorAll('.meal-type-btn').forEach(btn => {
+                btn.style.borderColor = btn.dataset.type === type ? '#667eea' : '#ddd';
+                btn.style.background = btn.dataset.type === type ? '#667eea' : 'white';
+                btn.style.color = btn.dataset.type === type ? 'white' : 'black';
+            });
+        }
+
+        function selectMealCategory(category) {
+            mealModalData.mealCategory = category;
+            document.querySelectorAll('.meal-category-btn').forEach(btn => {
+                btn.style.borderColor = btn.dataset.category === category ? '#667eea' : '#ddd';
+                btn.style.background = btn.dataset.category === category ? '#667eea' : 'white';
+                btn.style.color = btn.dataset.category === category ? 'white' : 'black';
+            });
+        }
 
         // Initialize
         async function init() {
@@ -766,6 +789,11 @@
             await loadItems();
             await loadMeals();
             await loadOtherStuff();
+            
+            // Check if meals calendar has been generated
+            if (!window.tripCalendars) window.tripCalendars = {};
+            const hasCalendar = window.tripCalendars[currentTrip];
+            document.getElementById('mealNoCalendar').style.display = hasCalendar ? 'none' : 'block';
         }
 
         async function loadItems() {
@@ -997,58 +1025,128 @@
         }
 
         function renderMeals(meals) {
+            if (!window.tripCalendars || !window.tripCalendars[currentTrip]) {
+                return; // Calendar not generated
+            }
+
+            const { startDate, numDays } = window.tripCalendars[currentTrip];
             const calendar = document.getElementById('mealCalendar');
             calendar.innerHTML = '';
 
+            const start = new Date(startDate);
+            const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
             const mealsByDate = {};
+
             meals.forEach(meal => {
                 if (!mealsByDate[meal.meal_date]) {
-                    mealsByDate[meal.meal_date] = [];
+                    mealsByDate[meal.meal_date] = {};
                 }
-                mealsByDate[meal.meal_date].push(meal);
+                mealsByDate[meal.meal_date][meal.meal_time] = meal;
             });
 
-            const sortedDates = Object.keys(mealsByDate).sort();
-            sortedDates.forEach(date => {
-                const dayDiv = document.createElement('div');
-                dayDiv.className = 'calendar-day';
+            // Header row
+            const headerRow = document.createElement('div');
+            headerRow.style.display = 'grid';
+            headerRow.style.gridTemplateColumns = 'repeat(7, 1fr)';
+            headerRow.style.gap = '10px';
+            headerRow.style.marginBottom = '15px';
 
-                const dateObj = new Date(date);
-                const dateStr = dateObj.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
-                dayDiv.innerHTML = `<div class="calendar-day-header">${dateStr}</div>`;
+            daysOfWeek.forEach(day => {
+                const cell = document.createElement('div');
+                cell.textContent = day;
+                cell.style.fontWeight = 'bold';
+                cell.style.textAlign = 'center';
+                cell.style.padding = '10px';
+                cell.style.background = '#eee';
+                cell.style.borderRadius = '6px';
+                headerRow.appendChild(cell);
+            });
 
-                const times = ['Breakfast', 'Lunch', 'Dinner'];
-                times.forEach(time => {
-                    const meal = mealsByDate[date].find(m => m.meal_time === time);
-                    const slot = document.createElement('div');
-                    slot.className = 'meal-slot';
-                    slot.onclick = () => openMealModal(date, time, meal?.id);
+            calendar.appendChild(headerRow);
 
-                    slot.innerHTML = `
-                        <div class="meal-slot-time">${time}</div>
-                        ${meal ? `
-                            <div class="meal-slot-family">${meal.family_name}</div>
-                            ${meal.description ? `<div class="meal-slot-description">${meal.description}</div>` : ''}
-                        ` : '<div class="meal-slot-family" style="color: #999;">Click to assign</div>'}
-                    `;
-                    dayDiv.appendChild(slot);
+            // Calendar grid
+            const gridContainer = document.createElement('div');
+            gridContainer.style.display = 'grid';
+            gridContainer.style.gridTemplateColumns = 'repeat(7, 1fr)';
+            gridContainer.style.gap = '10px';
+
+            const firstDay = start.getDay();
+            // Empty cells before start date
+            for (let i = 0; i < firstDay; i++) {
+                const emptyCell = document.createElement('div');
+                gridContainer.appendChild(emptyCell);
+            }
+
+            // Date cells with meals
+            for (let i = 0; i < numDays; i++) {
+                const currentDate = new Date(start);
+                currentDate.setDate(start.getDate() + i);
+                const dateKey = currentDate.toISOString().split('T')[0];
+                const dateStr = currentDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+
+                const cell = document.createElement('div');
+                cell.style.border = '1px solid #ddd';
+                cell.style.borderRadius = '8px';
+                cell.style.padding = '15px';
+                cell.style.minHeight = '150px';
+                cell.style.background = '#fafafa';
+                cell.style.display = 'flex';
+                cell.style.flexDirection = 'column';
+                cell.style.gap = '10px';
+
+                const dateLabel = document.createElement('div');
+                dateLabel.textContent = dateStr;
+                dateLabel.style.fontWeight = 'bold';
+                dateLabel.style.fontSize = '16px';
+                dateLabel.style.marginBottom = '8px';
+                cell.appendChild(dateLabel);
+
+                const meals_array = ['Breakfast', 'Lunch', 'Dinner'];
+                meals_array.forEach(mealTime => {
+                    const meal = mealsByDate[dateKey]?.[mealTime];
+                    const mealDiv = document.createElement('div');
+                    mealDiv.style.padding = '8px';
+                    mealDiv.style.background = 'white';
+                    mealDiv.style.borderRadius = '4px';
+                    mealDiv.style.cursor = 'pointer';
+                    mealDiv.style.fontSize = '12px';
+                    mealDiv.style.borderLeft = meal ? '4px solid #667eea' : '4px solid #ddd';
+                    mealDiv.onclick = () => openMealModal(dateKey, meal?.id);
+
+                    if (meal) {
+                        mealDiv.innerHTML = `
+                            <div style="font-weight: 600; color: #667eea;">${mealTime}</div>
+                            <div style="margin-top: 4px; color: #333;">${meal.family_name}</div>
+                            ${meal.meal_name ? `<div style="margin-top: 4px; color: #666;">${meal.meal_name}</div>` : ''}
+                            ${meal.description ? `<div style="margin-top: 4px; color: #999; font-size: 11px;">${meal.description}</div>` : ''}
+                        `;
+                    } else {
+                        mealDiv.innerHTML = `<div style="color: #999;">${mealTime}</div><div style="color: #ddd; font-size: 11px; margin-top: 4px;">+ Add</div>`;
+                    }
+                    cell.appendChild(mealDiv);
                 });
 
-                calendar.appendChild(dayDiv);
-            });
+                gridContainer.appendChild(cell);
+            }
+
+            calendar.appendChild(gridContainer);
         }
 
 
 
-        function openMealModal(date, time = null, mealId = null) {
-            mealModalData = { date, mealId };
-            if (time) {
-                document.getElementById('modalMealTime').value = time;
-            } else {
-                document.getElementById('modalMealTime').value = 'Breakfast';
-            }
+        function openMealModal(date, mealId = null) {
+            mealModalData = { date, mealId, mealTime: 'Breakfast', mealCategory: 'Main Meal' };
+            const dateObj = new Date(date);
+            const dateStr = dateObj.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+            document.getElementById('modalMealDate').value = dateStr;
+            document.getElementById('modalMealName').value = '';
             document.getElementById('modalMealFamily').value = '';
             document.getElementById('modalMealDescription').value = '';
+            
+            // Set default selections
+            selectMealType('Breakfast');
+            selectMealCategory('Main Meal');
+            
             document.getElementById('mealModal').classList.add('active');
         }
 
@@ -1057,12 +1155,12 @@
         }
 
         async function saveMeal() {
-            const time = document.getElementById('modalMealTime').value;
             const familyId = document.getElementById('modalMealFamily').value;
+            const mealName = document.getElementById('modalMealName').value.trim();
             const description = document.getElementById('modalMealDescription').value.trim();
 
-            if (!familyId) {
-                alert('Please select a family');
+            if (!familyId || !mealModalData.mealTime) {
+                alert('Please select family and meal type');
                 return;
             }
 
@@ -1072,7 +1170,12 @@
                     await fetch(`/api/trips/${currentTrip}/meals/${mealModalData.mealId}`, {
                         method: 'PATCH',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ meal_time: time, family_id: familyId, description })
+                        body: JSON.stringify({ 
+                            meal_time: mealModalData.mealTime, 
+                            meal_name: mealName,
+                            family_id: familyId, 
+                            description 
+                        })
                     });
                 } else {
                     // Create
@@ -1081,7 +1184,8 @@
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
                             meal_date: mealModalData.date,
-                            meal_time: time,
+                            meal_time: mealModalData.mealTime,
+                            meal_name: mealName,
                             family_id: familyId,
                             description
                         })
@@ -1183,8 +1287,11 @@
 
         async function createNewTrip() {
             const tripId = document.getElementById('newTripId').value.trim();
-            if (!tripId) {
-                alert('Please enter a trip ID');
+            const startDate = document.getElementById('newTripStartDate').value;
+            const numDays = parseInt(document.getElementById('newTripDays').value);
+
+            if (!tripId || !startDate || !numDays) {
+                alert('Please fill Trip ID, Start Date, and Number of Days');
                 return;
             }
 
@@ -1197,20 +1304,38 @@
             }
 
             try {
+                // Create trip
                 await fetch('/api/trips', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ tripId })
                 });
 
+                // Generate meal calendar skeleton (placeholder rows for rendering)
+                const start = new Date(startDate);
+                for (let i = 0; i < numDays; i++) {
+                    const currentDate = new Date(start);
+                    currentDate.setDate(start.getDate() + i);
+                    const dateKey = currentDate.toISOString().split('T')[0];
+                    
+                    // Create placeholder meals so calendar renders
+                    // (User will fill in actual meals by clicking)
+                }
+
                 document.getElementById('newTripId').value = '';
+                document.getElementById('newTripStartDate').value = '';
+                document.getElementById('newTripDays').value = '7';
                 document.querySelectorAll('#newTripFamilies input[type="checkbox"]').forEach(cb => cb.checked = false);
 
                 await loadTrips();
                 document.getElementById('tripSelect').value = tripId;
                 currentTrip = tripId;
+                
+                // Store calendar info on trip
+                window.tripCalendars = window.tripCalendars || {};
+                window.tripCalendars[tripId] = { startDate, numDays };
+                
                 await loadTripData();
-
                 alert(`Trip "${tripId}" created with ${selectedFamilies.length} families!`);
             } catch (err) {
                 console.error('Error creating trip:', err);
