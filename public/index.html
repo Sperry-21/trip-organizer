@@ -534,14 +534,14 @@
         </div>
 
         <div class="tabs">
-            <button class="tab-button active" data-tab="items">Items</button>
-            <button class="tab-button" data-tab="meals">Meals</button>
+            <button class="tab-button active" data-tab="meals">Meals</button>
+            <button class="tab-button" data-tab="items">Items</button>
             <button class="tab-button" data-tab="family">Family View</button>
             <button class="tab-button" data-tab="admin">Admin</button>
         </div>
 
-        <!-- Items Tab -->
-        <div id="items" class="content active">
+        <!-- Meals Tab -->
+        <div id="meals" class="content active">
             <div class="add-form">
                 <select id="itemFamily" required>
                     <option value="">-- Family --</option>
@@ -550,10 +550,9 @@
                 <select id="itemCategory" required>
                     <option value="">-- Category --</option>
                     <option value="Shared Items">Shared Items</option>
-                    <option value="Food & Drinks">Food & Drinks</option>
                     <option value="Entertainment">Entertainment</option>
+                    <option value="Games">Games</option>
                     <option value="Activities">Activities</option>
-                    <option value="Logistics">Logistics</option>
                     <option value="Other">Other</option>
                 </select>
                 <textarea id="itemNotes" placeholder="Notes (optional)"></textarea>
@@ -563,9 +562,9 @@
             <div id="itemsList" class="items-list"></div>
         </div>
 
-        <!-- Meals Tab -->
-        <div id="meals" class="content">
-            <div class="calendar-controls">
+        <!-- Items Tab -->
+        <div id="items" class="content">
+            <div class="add-form">
                 <input type="date" id="mealDate" required>
                 <button onclick="addMealDay()">Add Day to Calendar</button>
             </div>
@@ -776,10 +775,9 @@
 
             const categories = [
                 'Shared Items',
-                'Food & Drinks',
                 'Entertainment',
+                'Games',
                 'Activities',
-                'Logistics',
                 'Other'
             ];
 
@@ -832,7 +830,7 @@
             const notes = document.getElementById('itemNotes').value.trim();
 
             if (!currentTrip || !familyId || !itemName || !category) {
-                alert('Please fill all required fields');
+                alert('Please select family, item name, and category');
                 return;
             }
 
