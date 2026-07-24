@@ -1239,16 +1239,43 @@
                         mealDiv.style.borderRadius = '4px';
                         mealDiv.style.cursor = 'pointer';
                         mealDiv.style.fontSize = '12px';
-                        mealDiv.style.borderLeft = '4px solid #667eea';
-                        mealDiv.onclick = () => openMealModal(dateKey, meal.id);
-                        mealDiv.onmouseover = () => mealDiv.style.background = '#f0f0f0';
-                        mealDiv.onmouseout = () => mealDiv.style.background = 'white';
-
-                        mealDiv.innerHTML = `
-                            <div style="font-weight: 600; color: #667eea; font-size: 11px;">${meal.meal_time.toUpperCase()}</div>
+                        const isKids = meal.meal_category === 'Kids Meal';
+                        mealDiv.style.borderLeft = isKids ? '4px solid #ff6b9d' : '4px solid #667eea';
+                        mealDiv.style.display = 'flex';
+                        mealDiv.style.justifyContent = 'space-between';
+                        mealDiv.style.alignItems = 'flex-start';
+                        mealDiv.style.gap = '8px';
+                        
+                        const contentDiv = document.createElement('div');
+                        contentDiv.style.flex = '1';
+                        contentDiv.onclick = () => openMealModal(dateKey, meal.id);
+                        contentDiv.style.cursor = 'pointer';
+                        contentDiv.innerHTML = `
+                            <div style="font-weight: 600; color: ${isKids ? '#ff6b9d' : '#667eea'}; font-size: 11px;">${meal.meal_time.toUpperCase()}${isKids ? ' 👶' : ''}</div>
                             <div style="margin-top: 3px; color: #333; font-weight: 500; font-size: 13px;">${meal.family_name}</div>
                             ${meal.meal_name ? `<div style="margin-top: 3px; color: #666; font-size: 11px;">${meal.meal_name}</div>` : ''}
                         `;
+                        
+                        const deleteBtn = document.createElement('button');
+                        deleteBtn.textContent = '×';
+                        deleteBtn.style.background = 'none';
+                        deleteBtn.style.border = 'none';
+                        deleteBtn.style.color = '#ff6b9d';
+                        deleteBtn.style.fontSize = '18px';
+                        deleteBtn.style.cursor = 'pointer';
+                        deleteBtn.style.padding = '0';
+                        deleteBtn.style.fontWeight = 'bold';
+                        deleteBtn.onclick = (e) => {
+                            e.stopPropagation();
+                            deleteMeal(meal.id);
+                        };
+                        
+                        mealDiv.appendChild(contentDiv);
+                        mealDiv.appendChild(deleteBtn);
+                        
+                        mealDiv.onmouseover = () => mealDiv.style.background = '#f0f0f0';
+                        mealDiv.onmouseout = () => mealDiv.style.background = 'white';
+                        
                         cell.appendChild(mealDiv);
                     });
                 }
@@ -1277,6 +1304,17 @@
         }
 
 
+
+        async function deleteMeal(mealId) {
+            if (!confirm('Delete this meal?')) return;
+            try {
+                await fetch(`/api/trips/${currentTrip}/meals/${mealId}`, { method: 'DELETE' });
+                await loadMeals();
+            } catch (err) {
+                console.error('Error deleting meal:', err);
+                alert('Failed to delete meal');
+            }
+        }
 
         function openMealModal(date, mealId = null) {
             mealModalData = { date, mealId, mealTime: 'Breakfast', mealCategory: 'Main Meal' };
@@ -1497,9 +1535,10 @@
                 familyMeals.map(m => {
                     const dateObj = new Date(m.meal_date);
                     const day = dateObj.toLocaleDateString('en-US', { weekday: 'short' });
+                    const isKids = m.meal_category === 'Kids Meal';
                     return `
-                        <div style="padding: 10px; background: white; border-radius: 4px; margin-bottom: 8px; border-left: 4px solid #667eea;">
-                            <div style="font-weight: 600; color: #667eea; font-size: 13px;">${day.toUpperCase()} ${m.meal_time}</div>
+                        <div style="padding: 10px; background: white; border-radius: 4px; margin-bottom: 8px; border-left: 4px solid ${isKids ? '#ff6b9d' : '#667eea'}; cursor: pointer;" onclick="openMealModal('${m.meal_date}', ${m.id})">
+                            <div style="font-weight: 600; color: ${isKids ? '#ff6b9d' : '#667eea'}; font-size: 13px;">${day.toUpperCase()} ${m.meal_time}${isKids ? ' 👶' : ''}</div>
                             ${m.meal_name ? `<div style="margin-top: 4px; color: #333; font-weight: 500;">${m.meal_name}</div>` : ''}
                             ${m.description ? `<div style="margin-top: 4px; color: #666; font-size: 12px;">${m.description}</div>` : ''}
                         </div>
