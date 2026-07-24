@@ -297,18 +297,20 @@
         /* Family View Tab */
         .family-selector {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-            gap: 10px;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 8px;
             margin-bottom: 20px;
         }
 
         .family-btn {
-            padding: 10px;
+            padding: 12px 8px;
             border: 2px solid #ddd;
             border-radius: 6px;
-            background: white;
+            background: #f5f5f5;
+            color: #999;
             cursor: pointer;
             font-weight: 600;
+            font-size: 13px;
             transition: all 0.2s;
         }
 
@@ -320,6 +322,8 @@
 
         .family-btn:hover {
             border-color: #667eea;
+            background: white;
+            color: #667eea;
         }
 
         .family-view-content {
@@ -1130,7 +1134,7 @@
             const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
             const mealsByDateAndTime = {};
 
-            // Index meals by date and time for quick lookup
+            // Index meals by date and time
             meals.forEach(meal => {
                 const key = `${meal.meal_date}|${meal.meal_time}`;
                 mealsByDateAndTime[key] = meal;
@@ -1163,13 +1167,12 @@
             gridContainer.style.gap = '10px';
 
             const firstDay = start.getDay();
-            // Empty cells before start date
             for (let i = 0; i < firstDay; i++) {
                 const emptyCell = document.createElement('div');
                 gridContainer.appendChild(emptyCell);
             }
 
-            // Date cells with meals
+            // Date cells
             for (let i = 0; i < numDays; i++) {
                 const currentDate = new Date(start);
                 currentDate.setDate(start.getDate() + i);
@@ -1180,7 +1183,7 @@
                 cell.style.border = '1px solid #ddd';
                 cell.style.borderRadius = '8px';
                 cell.style.padding = '12px';
-                cell.style.minHeight = '140px';
+                cell.style.minHeight = '120px';
                 cell.style.background = '#fafafa';
                 cell.style.display = 'flex';
                 cell.style.flexDirection = 'column';
@@ -1190,37 +1193,54 @@
                 dateLabel.textContent = dateStr;
                 dateLabel.style.fontWeight = 'bold';
                 dateLabel.style.fontSize = '14px';
-                dateLabel.style.marginBottom = '4px';
                 cell.appendChild(dateLabel);
 
+                // Get meals for this day
                 const mealTimes = ['Breakfast', 'Lunch', 'Dinner'];
+                const dayMeals = [];
                 mealTimes.forEach(mealTime => {
                     const key = `${dateKey}|${mealTime}`;
-                    const meal = mealsByDateAndTime[key];
-                    
+                    if (mealsByDateAndTime[key]) {
+                        dayMeals.push(mealsByDateAndTime[key]);
+                    }
+                });
+
+                // Show existing meals
+                dayMeals.forEach(meal => {
                     const mealDiv = document.createElement('div');
                     mealDiv.style.padding = '8px';
-                    mealDiv.style.background = meal ? 'white' : '#f5f5f5';
+                    mealDiv.style.background = 'white';
                     mealDiv.style.borderRadius = '4px';
                     mealDiv.style.cursor = 'pointer';
                     mealDiv.style.fontSize = '12px';
-                    mealDiv.style.borderLeft = meal ? '4px solid #667eea' : '4px solid #ddd';
-                    mealDiv.style.transition = 'all 0.2s';
-                    mealDiv.onclick = () => openMealModal(dateKey, meal?.id);
+                    mealDiv.style.borderLeft = '4px solid #667eea';
+                    mealDiv.onclick = () => openMealModal(dateKey, meal.id);
                     mealDiv.onmouseover = () => mealDiv.style.background = '#f0f0f0';
-                    mealDiv.onmouseout = () => mealDiv.style.background = meal ? 'white' : '#f5f5f5';
+                    mealDiv.onmouseout = () => mealDiv.style.background = 'white';
 
-                    if (meal) {
-                        mealDiv.innerHTML = `
-                            <div style="font-weight: 600; color: #667eea; font-size: 11px;">${mealTime.toUpperCase()}</div>
-                            <div style="margin-top: 3px; color: #333; font-weight: 500;">${meal.family_name}</div>
-                            ${meal.meal_name ? `<div style="margin-top: 2px; color: #666;">${meal.meal_name}</div>` : ''}
-                        `;
-                    } else {
-                        mealDiv.innerHTML = `<div style="color: #999; font-size: 11px;">${mealTime}</div><div style="color: #ddd; font-size: 10px; margin-top: 2px;">+ Add</div>`;
-                    }
+                    mealDiv.innerHTML = `
+                        <div style="font-weight: 600; color: #667eea; font-size: 11px;">${meal.meal_time.toUpperCase()}</div>
+                        <div style="margin-top: 2px; color: #333; font-weight: 500;">${meal.family_name}</div>
+                        ${meal.meal_name ? `<div style="margin-top: 2px; color: #666; font-size: 11px;">${meal.meal_name}</div>` : ''}
+                    `;
                     cell.appendChild(mealDiv);
                 });
+
+                // Add button
+                const addBtn = document.createElement('button');
+                addBtn.textContent = dayMeals.length > 0 ? '+ Add meal' : '+ Add meal';
+                addBtn.style.padding = '6px 10px';
+                addBtn.style.background = '#f0f0f0';
+                addBtn.style.color = '#667eea';
+                addBtn.style.border = '1px dashed #667eea';
+                addBtn.style.borderRadius = '4px';
+                addBtn.style.cursor = 'pointer';
+                addBtn.style.fontSize = '12px';
+                addBtn.style.fontWeight = '600';
+                addBtn.onclick = () => openMealModal(dateKey);
+                addBtn.onmouseover = () => addBtn.style.background = '#e8e8e8';
+                addBtn.onmouseout = () => addBtn.style.background = '#f0f0f0';
+                cell.appendChild(addBtn);
 
                 gridContainer.appendChild(cell);
             }
@@ -1438,15 +1458,26 @@
             const familyItems = window.allItems?.filter(i => i.person == familyId) || [];
 
             document.getElementById('familyMeals').innerHTML = familyMeals.length ? 
-                familyMeals.map(m => `<div style="padding: 8px; background: white; border-radius: 4px; margin-bottom: 6px;"><strong>${m.meal_time}</strong> (${m.meal_date})${m.description ? '<br>' + m.description : ''}</div>`).join('') :
+                familyMeals.map(m => `
+                    <div style="padding: 10px; background: white; border-radius: 4px; margin-bottom: 8px; border-left: 4px solid #667eea;">
+                        <div style="font-weight: 600; color: #667eea; font-size: 13px;">${m.meal_time.toUpperCase()} (${m.meal_date})</div>
+                        ${m.meal_name ? `<div style="margin-top: 4px; color: #333; font-weight: 500;">${m.meal_name}</div>` : ''}
+                        ${m.description ? `<div style="margin-top: 4px; color: #666; font-size: 12px;">${m.description}</div>` : ''}
+                    </div>
+                `).join('') :
                 '<div class="family-section-empty">No meals assigned</div>';
 
             document.getElementById('familyOtherStuff').innerHTML = familyOtherStuff.length ?
-                familyOtherStuff.map(os => `<div style="padding: 8px; background: white; border-radius: 4px; margin-bottom: 6px;">${os.item}</div>`).join('') :
+                familyOtherStuff.map(os => `<div style="padding: 8px; background: white; border-radius: 4px; margin-bottom: 6px;">• ${os.item}</div>`).join('') :
                 '<div class="family-section-empty">No items</div>';
 
             document.getElementById('familyItems').innerHTML = familyItems.length ?
-                familyItems.map(item => `<div style="padding: 8px; background: white; border-radius: 4px; margin-bottom: 6px;"><strong>${item.item}</strong><br><small style="color: #666;">${item.category}</small></div>`).join('') :
+                familyItems.map(item => `
+                    <div style="padding: 8px; background: white; border-radius: 4px; margin-bottom: 6px;">
+                        <strong>${item.item}</strong>
+                        <div style="font-size: 12px; color: #666; margin-top: 2px;">${item.category}${item.notes ? ' • ' + item.notes : ''}</div>
+                    </div>
+                `).join('') :
                 '<div class="family-section-empty">Not bringing anything</div>';
         }
 
