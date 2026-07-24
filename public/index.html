@@ -552,6 +552,18 @@
                 <button onclick="switchTab('admin')" style="padding: 12px 24px; background: #667eea; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">Go to Admin</button>
             </div>
             <div id="mealCalendar" class="calendar-grid"></div>
+            
+            <!-- Meals Legend -->
+            <div style="margin-top: 20px; padding: 15px; background: #f9f9f9; border-radius: 6px; display: flex; gap: 20px; font-size: 13px;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <div style="width: 12px; height: 12px; background: #667eea; border-radius: 2px;"></div>
+                    <span>Main Meal</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <div style="width: 12px; height: 12px; background: #ff6b9d; border-radius: 2px;"></div>
+                    <span>Kids Meal 👶</span>
+                </div>
+            </div>
 
             <!-- Other Stuff by Family Section -->
             <div style="margin-top: 40px; background: #f9f9f9; padding: 20px; border-radius: 8px;">
@@ -1017,6 +1029,17 @@
             });
         }
 
+        async function deleteItem(itemId) {
+            if (!confirm('Delete this item?')) return;
+            try {
+                await fetch(`/api/trips/${currentTrip}/items/${itemId}`, { method: 'DELETE' });
+                await loadItems();
+            } catch (err) {
+                console.error('Error deleting item:', err);
+                alert('Failed to delete item');
+            }
+        }
+
         async function addItem() {
             const familyId = document.getElementById('itemFamily').value;
             const itemName = document.getElementById('itemName').value.trim();
@@ -1038,7 +1061,7 @@
 
                 document.getElementById('itemName').value = '';
                 document.getElementById('itemNotes').value = '';
-                document.getElementById('itemFamily').value = '';
+                // Keep family selected for better UX
                 document.getElementById('itemCategory').value = '';
                 await loadItems();
             } catch (err) {
