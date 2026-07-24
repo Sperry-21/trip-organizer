@@ -551,7 +551,17 @@
 
             <!-- Other Stuff by Family Section -->
             <div style="margin-top: 40px; background: #f9f9f9; padding: 20px; border-radius: 8px;">
-                <h3 style="margin-bottom: 20px; color: #333; font-size: 18px; border-bottom: 2px solid #667eea; padding-bottom: 10px;">Other Stuff by Family</h3>
+                <h3 style="margin-bottom: 15px; color: #333; font-size: 18px; border-bottom: 2px solid #667eea; padding-bottom: 10px;">Other Stuff by Family</h3>
+                
+                <!-- Add Other Stuff Form -->
+                <div style="background: white; padding: 15px; border-radius: 6px; margin-bottom: 20px; display: grid; grid-template-columns: 1fr 1fr auto; gap: 10px;">
+                    <select id="otherStuffFamily" required style="padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;">
+                        <option value="">-- Family --</option>
+                    </select>
+                    <input type="text" id="otherStuffItem" placeholder="Item to add" style="padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;">
+                    <button onclick="addOtherStuff()" style="padding: 10px 20px; background: #667eea; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">Add</button>
+                </div>
+
                 <div id="mealsOtherStuffByFamily" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px;"></div>
             </div>
         </div>
@@ -825,25 +835,7 @@
                 modalFamilySelect.appendChild(opt);
             });
 
-        function updateFamilyViewButtons() {
-            const familySelector = document.getElementById('familySelector');
-            familySelector.innerHTML = '';
-            
-            // Get trip-specific families
-            const tripFamilies = window.tripFamilies?.[currentTrip] || [];
-            if (tripFamilies.length === 0) {
-                familySelector.innerHTML = '<div style="color: #999; font-size: 14px;">No families in this trip</div>';
-                return;
-            }
 
-            tripFamilies.forEach(fam => {
-                const btn = document.createElement('button');
-                btn.className = 'family-btn';
-                btn.textContent = fam.name;
-                btn.addEventListener('click', () => selectFamily(fam.id, fam.name));
-                familySelector.appendChild(btn);
-            });
-        }
 
             // Trip creation checkboxes
             const newTripFamilies = document.getElementById('newTripFamilies');
@@ -862,6 +854,26 @@
                 label.appendChild(checkbox);
                 label.appendChild(document.createTextNode(fam.name));
                 newTripFamilies.appendChild(label);
+            });
+        }
+
+        function updateFamilyViewButtons() {
+            const familySelector = document.getElementById('familySelector');
+            familySelector.innerHTML = '';
+            
+            // Get trip-specific families
+            const tripFamilies = window.tripFamilies?.[currentTrip] || [];
+            if (tripFamilies.length === 0) {
+                familySelector.innerHTML = '<div style="color: #999; font-size: 14px;">No families in this trip</div>';
+                return;
+            }
+
+            tripFamilies.forEach(fam => {
+                const btn = document.createElement('button');
+                btn.className = 'family-btn';
+                btn.textContent = fam.name;
+                btn.addEventListener('click', () => selectFamily(fam.id, fam.name));
+                familySelector.appendChild(btn);
             });
         }
 
@@ -1116,13 +1128,12 @@
 
             const start = new Date(startDate);
             const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-            const mealsByDate = {};
+            const mealsByDateAndTime = {};
 
+            // Index meals by date and time for quick lookup
             meals.forEach(meal => {
-                if (!mealsByDate[meal.meal_date]) {
-                    mealsByDate[meal.meal_date] = {};
-                }
-                mealsByDate[meal.meal_date][meal.meal_time] = meal;
+                const key = `${meal.meal_date}|${meal.meal_time}`;
+                mealsByDateAndTime[key] = meal;
             });
 
             // Header row
@@ -1168,41 +1179,45 @@
                 const cell = document.createElement('div');
                 cell.style.border = '1px solid #ddd';
                 cell.style.borderRadius = '8px';
-                cell.style.padding = '15px';
-                cell.style.minHeight = '150px';
+                cell.style.padding = '12px';
+                cell.style.minHeight = '140px';
                 cell.style.background = '#fafafa';
                 cell.style.display = 'flex';
                 cell.style.flexDirection = 'column';
-                cell.style.gap = '10px';
+                cell.style.gap = '8px';
 
                 const dateLabel = document.createElement('div');
                 dateLabel.textContent = dateStr;
                 dateLabel.style.fontWeight = 'bold';
-                dateLabel.style.fontSize = '16px';
-                dateLabel.style.marginBottom = '8px';
+                dateLabel.style.fontSize = '14px';
+                dateLabel.style.marginBottom = '4px';
                 cell.appendChild(dateLabel);
 
-                const meals_array = ['Breakfast', 'Lunch', 'Dinner'];
-                meals_array.forEach(mealTime => {
-                    const meal = mealsByDate[dateKey]?.[mealTime];
+                const mealTimes = ['Breakfast', 'Lunch', 'Dinner'];
+                mealTimes.forEach(mealTime => {
+                    const key = `${dateKey}|${mealTime}`;
+                    const meal = mealsByDateAndTime[key];
+                    
                     const mealDiv = document.createElement('div');
                     mealDiv.style.padding = '8px';
-                    mealDiv.style.background = 'white';
+                    mealDiv.style.background = meal ? 'white' : '#f5f5f5';
                     mealDiv.style.borderRadius = '4px';
                     mealDiv.style.cursor = 'pointer';
                     mealDiv.style.fontSize = '12px';
                     mealDiv.style.borderLeft = meal ? '4px solid #667eea' : '4px solid #ddd';
+                    mealDiv.style.transition = 'all 0.2s';
                     mealDiv.onclick = () => openMealModal(dateKey, meal?.id);
+                    mealDiv.onmouseover = () => mealDiv.style.background = '#f0f0f0';
+                    mealDiv.onmouseout = () => mealDiv.style.background = meal ? 'white' : '#f5f5f5';
 
                     if (meal) {
                         mealDiv.innerHTML = `
-                            <div style="font-weight: 600; color: #667eea;">${mealTime}</div>
-                            <div style="margin-top: 4px; color: #333;">${meal.family_name}</div>
-                            ${meal.meal_name ? `<div style="margin-top: 4px; color: #666;">${meal.meal_name}</div>` : ''}
-                            ${meal.description ? `<div style="margin-top: 4px; color: #999; font-size: 11px;">${meal.description}</div>` : ''}
+                            <div style="font-weight: 600; color: #667eea; font-size: 11px;">${mealTime.toUpperCase()}</div>
+                            <div style="margin-top: 3px; color: #333; font-weight: 500;">${meal.family_name}</div>
+                            ${meal.meal_name ? `<div style="margin-top: 2px; color: #666;">${meal.meal_name}</div>` : ''}
                         `;
                     } else {
-                        mealDiv.innerHTML = `<div style="color: #999;">${mealTime}</div><div style="color: #ddd; font-size: 11px; margin-top: 4px;">+ Add</div>`;
+                        mealDiv.innerHTML = `<div style="color: #999; font-size: 11px;">${mealTime}</div><div style="color: #ddd; font-size: 10px; margin-top: 2px;">+ Add</div>`;
                     }
                     cell.appendChild(mealDiv);
                 });
@@ -1306,6 +1321,19 @@
             if (!container) return;
             container.innerHTML = '';
 
+            // Populate family dropdown
+            const familySelect = document.getElementById('otherStuffFamily');
+            if (familySelect) {
+                familySelect.innerHTML = '<option value="">-- Family --</option>';
+                const tripFamilies = window.tripFamilies?.[currentTrip] || [];
+                tripFamilies.forEach(fam => {
+                    const opt = document.createElement('option');
+                    opt.value = fam.id;
+                    opt.textContent = fam.name;
+                    familySelect.appendChild(opt);
+                });
+            }
+
             // Group by family
             const byFamily = {};
             otherStuff.forEach(item => {
@@ -1337,14 +1365,67 @@
 
                 family.items.forEach(item => {
                     const itemDiv = document.createElement('div');
-                    itemDiv.textContent = `• ${item.item}`;
-                    itemDiv.style.color = '#666';
+                    itemDiv.style.display = 'flex';
+                    itemDiv.style.justifyContent = 'space-between';
+                    itemDiv.style.alignItems = 'center';
+                    
+                    const itemText = document.createElement('div');
+                    itemText.textContent = `• ${item.item}`;
+                    itemText.style.color = '#666';
+                    itemDiv.appendChild(itemText);
+                    
+                    const deleteBtn = document.createElement('button');
+                    deleteBtn.textContent = '×';
+                    deleteBtn.style.background = 'none';
+                    deleteBtn.style.border = 'none';
+                    deleteBtn.style.color = '#ff4757';
+                    deleteBtn.style.cursor = 'pointer';
+                    deleteBtn.style.fontSize = '16px';
+                    deleteBtn.style.fontWeight = 'bold';
+                    deleteBtn.onclick = () => deleteOtherStuff(item.id);
+                    itemDiv.appendChild(deleteBtn);
+                    
                     itemsDiv.appendChild(itemDiv);
                 });
 
                 familyCard.appendChild(itemsDiv);
                 container.appendChild(familyCard);
             });
+        }
+
+        async function addOtherStuff() {
+            const familyId = document.getElementById('otherStuffFamily').value;
+            const item = document.getElementById('otherStuffItem').value.trim();
+
+            if (!familyId || !item) {
+                alert('Please select family and item');
+                return;
+            }
+
+            try {
+                await fetch(`/api/trips/${currentTrip}/other-stuff`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ familyId: parseInt(familyId), item })
+                });
+
+                document.getElementById('otherStuffItem').value = '';
+                document.getElementById('otherStuffFamily').value = '';
+                await loadOtherStuff();
+            } catch (err) {
+                console.error('Error adding other stuff:', err);
+                alert('Failed to add item');
+            }
+        }
+
+        async function deleteOtherStuff(id) {
+            if (!confirm('Delete this item?')) return;
+            try {
+                await fetch(`/api/trips/${currentTrip}/other-stuff/${id}`, { method: 'DELETE' });
+                await loadOtherStuff();
+            } catch (err) {
+                console.error('Error deleting other stuff:', err);
+            }
         }
 
         function selectFamily(familyId, familyName) {
