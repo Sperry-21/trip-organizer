@@ -542,6 +542,16 @@
 
         <!-- Meals Tab -->
         <div id="meals" class="content active">
+            <div class="calendar-controls">
+                <input type="date" id="mealDate" required>
+                <button onclick="addMealDay()">Add Day to Calendar</button>
+            </div>
+
+            <div id="mealCalendar" class="calendar-grid"></div>
+        </div>
+
+        <!-- Items Tab -->
+        <div id="items" class="content">
             <div class="add-form">
                 <select id="itemFamily" required>
                     <option value="">-- Family --</option>
@@ -560,16 +570,6 @@
             </div>
 
             <div id="itemsList" class="items-list"></div>
-        </div>
-
-        <!-- Items Tab -->
-        <div id="items" class="content">
-            <div class="add-form">
-                <input type="date" id="mealDate" required>
-                <button onclick="addMealDay()">Add Day to Calendar</button>
-            </div>
-
-            <div id="mealCalendar" class="calendar-grid"></div>
         </div>
 
         <!-- Family View Tab -->
