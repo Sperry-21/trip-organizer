@@ -1176,10 +1176,6 @@
             const calendar = document.getElementById('mealCalendar');
             if (!calendar) return;
             
-            console.log('renderMeals called with:', meals);
-            console.log('currentTrip:', currentTrip);
-            console.log('tripCalendars:', window.tripCalendars);
-            
             if (!window.tripCalendars || !window.tripCalendars[currentTrip]) {
                 calendar.innerHTML = '<div style="padding: 20px; text-align: center; color: #999;">No calendar set up for this trip. Create one in the Admin tab.</div>';
                 return;
@@ -1198,8 +1194,6 @@
                 }
                 mealsByDate[meal.meal_date].push(meal);
             });
-            
-            console.log('mealsByDate:', mealsByDate);
 
             // Single row calendar
             const gridContainer = document.createElement('div');
@@ -1237,7 +1231,6 @@
 
                 // Meals section
                 const dayMeals = mealsByDate[dateKey] || [];
-                console.log(`Meals for ${dateKey}:`, dayMeals);
                 if (dayMeals.length > 0) {
                     dayMeals.forEach(meal => {
                         const mealDiv = document.createElement('div');
@@ -1340,11 +1333,15 @@
                     });
                 } else {
                     // Create
+                    // Ensure date is stored as YYYY-MM-DD only
+                    const dateObj = new Date(mealModalData.date);
+                    const mealDate = dateObj.toISOString().split('T')[0];
+                    
                     await fetch(`/api/trips/${currentTrip}/meals`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
-                            meal_date: mealModalData.date,
+                            meal_date: mealDate,
                             meal_time: mealModalData.mealTime,
                             meal_name: mealName,
                             family_id: familyId,
