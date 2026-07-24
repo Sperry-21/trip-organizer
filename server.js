@@ -174,7 +174,12 @@ app.get('/api/trips/:tripId/meals', async (req, res) => {
   try {
     const { tripId } = req.params;
     const result = await sql`SELECT tm.*, f.name as family_name, f.color FROM trip_meals tm LEFT JOIN families f ON tm.family_id = f.id WHERE tm.trip_id = ${ tripId } ORDER BY tm.meal_date, tm.meal_time`;
-    res.json(result.rows);
+    // Normalize meal_date to YYYY-MM-DD format
+    const meals = result.rows.map(meal => ({
+      ...meal,
+      meal_date: new Date(meal.meal_date).toISOString().split('T')[0]
+    }));
+    res.json(meals);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -183,7 +188,9 @@ app.get('/api/trips/:tripId/meals', async (req, res) => {
 app.post('/api/trips/:tripId/meals', async (req, res) => {
   try {
     const { tripId } = req.params;
-    const { meal_date, meal_time, meal_name, family_id, description } = req.body;
+    let { meal_date, meal_time, meal_name, family_id, description } = req.body;
+    // Normalize date to YYYY-MM-DD
+    meal_date = new Date(meal_date).toISOString().split('T')[0];
     await sql`INSERT INTO trip_meals(trip_id, meal_date, meal_time, meal_name, family_id, description) VALUES(${ tripId }, ${ meal_date }, ${ meal_time }, ${ meal_name || null}, ${ family_id }, ${ description || null})`;
     res.json({ success: true });
   } catch (err) {
