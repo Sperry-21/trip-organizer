@@ -600,6 +600,11 @@
         <!-- Admin Tab -->
         <div id="admin" class="content">
             <div class="admin-section">
+                <h3>Existing Trips</h3>
+                <div id="existingTripsList" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 15px;"></div>
+            </div>
+
+            <div class="admin-section">
                 <h3>Create New Trip</h3>
                 <div class="admin-form">
                     <input type="text" id="newTripId" placeholder="Trip ID (e.g., moose-25)">
@@ -699,9 +704,25 @@
                 btn.addEventListener('click', (e) => switchTab(e.target.dataset.tab));
             });
 
-            document.getElementById('tripSelect').addEventListener('change', (e) => {
+            document.getElementById('tripSelect').addEventListener('change', async (e) => {
                 currentTrip = e.target.value;
                 if (currentTrip) {
+                    // Fetch trip metadata
+                    try {
+                        const res = await fetch(`/api/trips/${currentTrip}`);
+                        const tripData = res.ok ? await res.json() : null;
+                        if (tripData && tripData.start_date && tripData.num_days) {
+                            if (!window.tripCalendars) window.tripCalendars = {};
+                            if (!window.tripFamilies) window.tripFamilies = {};
+                            window.tripCalendars[currentTrip] = { 
+                                startDate: tripData.start_date, 
+                                numDays: tripData.num_days 
+                            };
+                            window.tripFamilies[currentTrip] = tripData.families ? JSON.parse(tripData.families) : [];
+                        }
+                    } catch (err) {
+                        console.error('Error fetching trip metadata:', err);
+                    }
                     loadTripData();
                 }
             });
@@ -733,8 +754,53 @@
                     opt.textContent = trip;
                     select.appendChild(opt);
                 });
+                await renderExistingTrips();
             } catch (err) {
                 console.error('Error loading trips:', err);
+            }
+        }
+
+        async function renderExistingTrips() {
+            const container = document.getElementById('existingTripsList');
+            container.innerHTML = '';
+
+            for (const tripId of allTrips) {
+                try {
+                    const res = await fetch(`/api/trips/${tripId}`);
+                    const tripData = res.ok ? await res.json() : null;
+
+                    const card = document.createElement('div');
+                    card.style.background = 'white';
+                    card.style.border = '1px solid #ddd';
+                    card.style.borderRadius = '8px';
+                    card.style.padding = '15px';
+                    card.style.cursor = 'pointer';
+                    card.onclick = () => {
+                        document.getElementById('tripSelect').value = tripId;
+                        document.getElementById('tripSelect').dispatchEvent(new Event('change'));
+                    };
+
+                    let html = `<div style="font-weight: 600; font-size: 16px; margin-bottom: 10px; color: #667eea;">${tripId}</div>`;
+                    
+                    if (tripData?.start_date && tripData?.num_days) {
+                        const startDate = new Date(tripData.start_date);
+                        const endDate = new Date(startDate);
+                        endDate.setDate(startDate.getDate() + tripData.num_days - 1);
+                        const startStr = startDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                        const endStr = endDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                        html += `<div style="font-size: 13px; color: #666; margin-bottom: 8px;">📅 ${startStr} - ${endStr} (${tripData.num_days} days)</div>`;
+                    }
+
+                    if (tripData?.families) {
+                        const families = JSON.parse(tripData.families);
+                        html += `<div style="font-size: 12px; color: #999;">👥 ${families.length} families</div>`;
+                    }
+
+                    card.innerHTML = html;
+                    container.appendChild(card);
+                } catch (err) {
+                    console.error(`Error loading trip ${tripId}:`, err);
+                }
             }
         }
 
@@ -759,16 +825,25 @@
                 modalFamilySelect.appendChild(opt);
             });
 
-            // Family View buttons
+        function updateFamilyViewButtons() {
             const familySelector = document.getElementById('familySelector');
             familySelector.innerHTML = '';
-            allFamilies.forEach(fam => {
+            
+            // Get trip-specific families
+            const tripFamilies = window.tripFamilies?.[currentTrip] || [];
+            if (tripFamilies.length === 0) {
+                familySelector.innerHTML = '<div style="color: #999; font-size: 14px;">No families in this trip</div>';
+                return;
+            }
+
+            tripFamilies.forEach(fam => {
                 const btn = document.createElement('button');
                 btn.className = 'family-btn';
                 btn.textContent = fam.name;
                 btn.addEventListener('click', () => selectFamily(fam.id, fam.name));
                 familySelector.appendChild(btn);
             });
+        }
 
             // Trip creation checkboxes
             const newTripFamilies = document.getElementById('newTripFamilies');
@@ -796,6 +871,7 @@
             await loadItems();
             await loadMeals();
             await loadOtherStuff();
+            updateFamilyViewButtons();
             
             // Check if meals calendar has been generated
             if (!window.tripCalendars) window.tripCalendars = {};
@@ -850,8 +926,6 @@
                     if (item.completed) row.classList.add('completed');
 
                     row.innerHTML = `
-                        <input type="checkbox" class="item-checkbox" ${item.completed ? 'checked' : ''} 
-                            onchange="toggleItem(${item.id}, this.checked)">
                         <div class="item-content">
                             <div class="item-text">${item.item}</div>
                             <div class="item-meta">${familyName}${item.notes ? ' • ' + item.notes : ''}</div>
@@ -1367,14 +1441,14 @@
             }
 
             try {
-                // Create trip
+                // Create trip with metadata
                 await fetch('/api/trips', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ tripId })
+                    body: JSON.stringify({ tripId, startDate, numDays, families: selectedFamilies })
                 });
 
-                // Store calendar and family info
+                // Store in memory
                 if (!window.tripCalendars) window.tripCalendars = {};
                 if (!window.tripFamilies) window.tripFamilies = {};
                 window.tripCalendars[tripId] = { startDate, numDays };

@@ -17,6 +17,7 @@ async function initDb() {
     await sql`CREATE TABLE IF NOT EXISTS trip_items (id BIGINT PRIMARY KEY, trip_id VARCHAR(255) NOT NULL, person VARCHAR(255) NOT NULL, item VARCHAR(255) NOT NULL, category VARCHAR(255) NOT NULL, notes TEXT, completed BOOLEAN DEFAULT false, created_at TIMESTAMP DEFAULT NOW());`;
     await sql`CREATE TABLE IF NOT EXISTS trip_meals (id SERIAL PRIMARY KEY, trip_id VARCHAR(255) NOT NULL, meal_date DATE NOT NULL, meal_time VARCHAR(50), meal_name VARCHAR(255), family_id INTEGER REFERENCES families(id), description TEXT, created_at TIMESTAMP DEFAULT NOW());`;
     await sql`CREATE TABLE IF NOT EXISTS trips (id SERIAL PRIMARY KEY,  trip_id VARCHAR(255) UNIQUE NOT NULL,  name VARCHAR(255),  created_at TIMESTAMP DEFAULT NOW())`;
+    await sql`CREATE TABLE IF NOT EXISTS trip_metadata (id SERIAL PRIMARY KEY, trip_id VARCHAR(255) UNIQUE NOT NULL REFERENCES trips(trip_id) ON DELETE CASCADE, start_date DATE, num_days INTEGER, families TEXT, created_at TIMESTAMP DEFAULT NOW());`;
     await sql`CREATE TABLE IF NOT EXISTS trip_other_stuff ( id SERIAL PRIMARY KEY,  trip_id VARCHAR(255) NOT NULL,  family_id INTEGER REFERENCES families(id),  item TEXT NOT NULL,  created_at TIMESTAMP DEFAULT NOW()
 )`;
 
@@ -74,13 +75,43 @@ app.get('/api/trips', async (req, res) => {
 
 app.post('/api/trips', async (req, res) => {
   try {
-    const { tripId } = req.body;
+    const { tripId, startDate, numDays, families } = req.body;
     if (!tripId) return res.status(400).json({ error: 'tripId required' });
 
     // Insert into trips table
     await sql`INSERT INTO trips(trip_id, name) VALUES(${ tripId }, ${ tripId })`;
 
+    // Insert metadata if provided
+    if (startDate && numDays) {
+      const familiesJson = families ? JSON.stringify(families) : null;
+      await sql`INSERT INTO trip_metadata(trip_id, start_date, num_days, families) VALUES(${ tripId }, ${ startDate }, ${ numDays }, ${ familiesJson })`;
+    }
+
     res.json({ success: true, tripId });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get('/api/trips/:tripId', async (req, res) => {
+  try {
+    const { tripId } = req.params;
+    const result = await sql`SELECT t.*, m.start_date, m.num_days, m.families FROM trips t LEFT JOIN trip_metadata m ON t.trip_id = m.trip_id WHERE t.trip_id = ${ tripId }`;
+    if (result.rows.length === 0) return res.status(404).json({ error: 'Trip not found' });
+    res.json(result.rows[0]);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.patch('/api/trips/:tripId', async (req, res) => {
+  try {
+    const { tripId } = req.params;
+    const { startDate, numDays, families } = req.body;
+    const familiesJson = families ? JSON.stringify(families) : null;
+    
+    await sql`UPDATE trip_metadata SET start_date = ${ startDate }, num_days = ${ numDays }, families = ${ familiesJson } WHERE trip_id = ${ tripId }`;
+    res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
