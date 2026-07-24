@@ -107,10 +107,11 @@ app.get('/api/trips/:tripId', async (req, res) => {
 app.patch('/api/trips/:tripId', async (req, res) => {
   try {
     const { tripId } = req.params;
-    const { startDate, numDays, families } = req.body;
+    const { startDate, numDays, families, logistics } = req.body;
     const familiesJson = families ? JSON.stringify(families) : null;
+    const logisticsJson = logistics ? JSON.stringify(logistics) : null;
     
-    await sql`UPDATE trip_metadata SET start_date = ${ startDate }, num_days = ${ numDays }, families = ${ familiesJson } WHERE trip_id = ${ tripId }`;
+    await sql`UPDATE trip_metadata SET start_date = ${ startDate }, num_days = ${ numDays }, families = ${ familiesJson }, logistics = ${ logisticsJson } WHERE trip_id = ${ tripId }`;
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: err.message });

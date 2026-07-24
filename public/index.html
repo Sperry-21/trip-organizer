@@ -537,6 +537,12 @@
             </div>
         </div>
 
+        <!-- Logistics Banner -->
+        <div id="logisticsBanner" style="background: #fff3cd; border: 1px solid #ffc107; border-radius: 6px; padding: 15px 20px; margin: 20px; display: none;">
+            <div style="font-weight: 600; color: #856404; margin-bottom: 8px;">📋 Logistics</div>
+            <ul id="logisticsItems" style="margin: 0; padding-left: 20px; color: #856404; font-size: 14px;"></ul>
+        </div>
+
         <div class="tabs">
             <button class="tab-button active" data-tab="meals">Meals</button>
             <button class="tab-button" data-tab="items">Items</button>
@@ -642,6 +648,15 @@
             </div>
 
             <div class="admin-section">
+                <h3>📋 Trip Logistics</h3>
+                <div style="background: #f9f9f9; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
+                    <div style="font-size: 13px; color: #666; margin-bottom: 10px;">Add logistics items (one per line):</div>
+                    <textarea id="logisticsText" placeholder="e.g.&#10;Bring camping permits&#10;Reserve parking&#10;Check weather" style="width: 100%; height: 120px; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-family: monospace; font-size: 13px; resize: vertical;"></textarea>
+                    <button onclick="saveLogistics()" style="width: 100%; padding: 10px; margin-top: 10px; background: #667eea; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">Save Logistics</button>
+                </div>
+            </div>
+
+            <div class="admin-section">
                 <h3>👥 Add or Manage Families</h3>
                 <div class="admin-form">
                     <input type="text" id="newFamilyName" placeholder="Family name">
@@ -723,9 +738,9 @@
 
         // Initialize
         async function init() {
+            setupEventListeners();  // Set up listeners first
             await loadFamilies();
-            await loadTrips();
-            setupEventListeners();
+            await loadTrips();  // This will now trigger change event
         }
 
         function setupEventListeners() {
@@ -959,6 +974,7 @@
             await loadItems();
             await loadMeals();
             await loadOtherStuff();
+            await loadLogistics();
             updateFamilyViewButtons();
             
             // Check if meals calendar has been generated
@@ -1252,8 +1268,10 @@
                 dateLabel.innerHTML = `<div style="font-size: 11px; color: #999;">${dayName}</div><div style="font-size: 16px; color: #333;">${dateNum}</div>`;
                 cell.appendChild(dateLabel);
 
-                // Meals section
-                const dayMeals = mealsByDate[dateKey] || [];
+                // Meals section - sort by time of day
+                const mealOrder = { 'Breakfast': 1, 'Lunch': 2, 'Dinner': 3 };
+                let dayMeals = mealsByDate[dateKey] || [];
+                dayMeals = dayMeals.sort((a, b) => (mealOrder[a.meal_time] || 999) - (mealOrder[b.meal_time] || 999));
                 if (dayMeals.length > 0) {
                     dayMeals.forEach(meal => {
                         const mealDiv = document.createElement('div');
@@ -1339,6 +1357,47 @@
             }
         }
 
+        async function saveLogistics() {
+            const logisticsText = document.getElementById('logisticsText').value.trim();
+            const items = logisticsText.split('\n').filter(line => line.trim());
+            
+            try {
+                // Store in trip metadata
+                await fetch(`/api/trips/${currentTrip}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ logistics: items })
+                });
+                await loadLogistics();
+            } catch (err) {
+                console.error('Error saving logistics:', err);
+                alert('Failed to save logistics');
+            }
+        }
+
+        async function loadLogistics() {
+            try {
+                const res = await fetch(`/api/trips/${currentTrip}`);
+                const tripData = res.ok ? await res.json() : null;
+                const logistics = tripData?.logistics || [];
+                
+                const banner = document.getElementById('logisticsBanner');
+                const list = document.getElementById('logisticsItems');
+                
+                if (logistics.length > 0) {
+                    banner.style.display = 'block';
+                    list.innerHTML = logistics.map(item => `<li>${item}</li>`).join('');
+                } else {
+                    banner.style.display = 'none';
+                }
+                
+                // Also update admin textarea
+                document.getElementById('logisticsText').value = logistics.join('\n');
+            } catch (err) {
+                console.error('Error loading logistics:', err);
+            }
+        }
+
         function openMealModal(date, mealId = null) {
             mealModalData = { date, mealId, mealTime: 'Breakfast', mealCategory: 'Main Meal' };
             const dateObj = new Date(date);
@@ -1388,7 +1447,8 @@
                         body: JSON.stringify({ 
                             meal_time: mealModalData.mealTime, 
                             meal_name: mealName,
-                            family_id: familyId, 
+                            family_id: familyId,
+                            meal_category: mealModalData.mealCategory,
                             description 
                         })
                     });
@@ -1406,6 +1466,7 @@
                             meal_time: mealModalData.mealTime,
                             meal_name: mealName,
                             family_id: familyId,
+                            meal_category: mealModalData.mealCategory,
                             description
                         })
                     });
