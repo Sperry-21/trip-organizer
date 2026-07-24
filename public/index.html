@@ -822,7 +822,8 @@
             // Items form
             const itemFamilySelect = document.getElementById('itemFamily');
             itemFamilySelect.innerHTML = '<option value="">-- Family --</option>';
-            allFamilies.forEach(fam => {
+            const tripFamilies = window.tripFamilies?.[currentTrip] || [];
+            tripFamilies.forEach(fam => {
                 const opt = document.createElement('option');
                 opt.value = fam.id;
                 opt.textContent = fam.name;
@@ -1111,17 +1112,7 @@
             calendar.appendChild(gridContainer);
         }
 
-        async function loadMeals() {
-            try {
-                const res = await fetch(`/api/trips/${currentTrip}/meals`);
-                const meals = await res.json();
-                renderMeals(meals);
-            } catch (err) {
-                console.error('Error loading meals:', err);
-            }
-        }
 
-        function renderMeals(meals) {
             if (!window.tripCalendars || !window.tripCalendars[currentTrip]) {
                 return; // Calendar not generated
             }
@@ -1458,13 +1449,17 @@
             const familyItems = window.allItems?.filter(i => i.person == familyId) || [];
 
             document.getElementById('familyMeals').innerHTML = familyMeals.length ? 
-                familyMeals.map(m => `
-                    <div style="padding: 10px; background: white; border-radius: 4px; margin-bottom: 8px; border-left: 4px solid #667eea;">
-                        <div style="font-weight: 600; color: #667eea; font-size: 13px;">${m.meal_time.toUpperCase()} (${m.meal_date})</div>
-                        ${m.meal_name ? `<div style="margin-top: 4px; color: #333; font-weight: 500;">${m.meal_name}</div>` : ''}
-                        ${m.description ? `<div style="margin-top: 4px; color: #666; font-size: 12px;">${m.description}</div>` : ''}
-                    </div>
-                `).join('') :
+                familyMeals.map(m => {
+                    const dateObj = new Date(m.meal_date);
+                    const day = dateObj.toLocaleDateString('en-US', { weekday: 'short' });
+                    return `
+                        <div style="padding: 10px; background: white; border-radius: 4px; margin-bottom: 8px; border-left: 4px solid #667eea;">
+                            <div style="font-weight: 600; color: #667eea; font-size: 13px;">${day.toUpperCase()} ${m.meal_time}</div>
+                            ${m.meal_name ? `<div style="margin-top: 4px; color: #333; font-weight: 500;">${m.meal_name}</div>` : ''}
+                            ${m.description ? `<div style="margin-top: 4px; color: #666; font-size: 12px;">${m.description}</div>` : ''}
+                        </div>
+                    `;
+                }).join('') :
                 '<div class="family-section-empty">No meals assigned</div>';
 
             document.getElementById('familyOtherStuff').innerHTML = familyOtherStuff.length ?
