@@ -548,6 +548,12 @@
                 <button onclick="switchTab('admin')" style="padding: 12px 24px; background: #667eea; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">Go to Admin</button>
             </div>
             <div id="mealCalendar" class="calendar-grid"></div>
+
+            <!-- Other Stuff by Family Section -->
+            <div style="margin-top: 40px; background: #f9f9f9; padding: 20px; border-radius: 8px;">
+                <h3 style="margin-bottom: 20px; color: #333; font-size: 18px; border-bottom: 2px solid #667eea; padding-bottom: 10px;">Other Stuff by Family</h3>
+                <div id="mealsOtherStuffByFamily" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px;"></div>
+            </div>
         </div>
 
         <!-- Items Tab -->
@@ -786,6 +792,7 @@
 
         async function loadTripData() {
             if (!currentTrip) return;
+            await loadFamilies(); // Reload to get full list, then filter
             await loadItems();
             await loadMeals();
             await loadOtherStuff();
@@ -1140,8 +1147,18 @@
             const dateStr = dateObj.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
             document.getElementById('modalMealDate').value = dateStr;
             document.getElementById('modalMealName').value = '';
-            document.getElementById('modalMealFamily').value = '';
             document.getElementById('modalMealDescription').value = '';
+            
+            // Populate family dropdown with only trip-specific families
+            const familySelect = document.getElementById('modalMealFamily');
+            familySelect.innerHTML = '<option value="">-- Select Family --</option>';
+            const tripFamilies = window.tripFamilies?.[currentTrip] || [];
+            tripFamilies.forEach(fam => {
+                const opt = document.createElement('option');
+                opt.value = fam.id;
+                opt.textContent = fam.name;
+                familySelect.appendChild(opt);
+            });
             
             // Set default selections
             selectMealType('Breakfast');
@@ -1203,11 +1220,57 @@
             try {
                 const res = await fetch(`/api/trips/${currentTrip}/other-stuff`);
                 const data = await res.json();
-                // Store for family view
                 window.otherStuffData = data;
+                renderOtherStuffByFamily(data);
             } catch (err) {
                 console.error('Error loading other stuff:', err);
             }
+        }
+
+        function renderOtherStuffByFamily(otherStuff) {
+            const container = document.getElementById('mealsOtherStuffByFamily');
+            if (!container) return;
+            container.innerHTML = '';
+
+            // Group by family
+            const byFamily = {};
+            otherStuff.forEach(item => {
+                if (!byFamily[item.family_id]) {
+                    byFamily[item.family_id] = { name: item.name, color: item.color, items: [] };
+                }
+                byFamily[item.family_id].items.push(item);
+            });
+
+            // Render each family's stuff
+            Object.values(byFamily).forEach(family => {
+                const familyCard = document.createElement('div');
+                familyCard.style.background = 'white';
+                familyCard.style.border = `4px solid ${family.color}`;
+                familyCard.style.borderRadius = '6px';
+                familyCard.style.padding = '12px';
+
+                const nameDiv = document.createElement('div');
+                nameDiv.textContent = family.name;
+                nameDiv.style.fontWeight = '600';
+                nameDiv.style.marginBottom = '8px';
+                nameDiv.style.color = family.color;
+                familyCard.appendChild(nameDiv);
+
+                const itemsDiv = document.createElement('div');
+                itemsDiv.style.display = 'grid';
+                itemsDiv.style.gap = '6px';
+                itemsDiv.style.fontSize = '13px';
+
+                family.items.forEach(item => {
+                    const itemDiv = document.createElement('div');
+                    itemDiv.textContent = `• ${item.item}`;
+                    itemDiv.style.color = '#666';
+                    itemsDiv.appendChild(itemDiv);
+                });
+
+                familyCard.appendChild(itemsDiv);
+                container.appendChild(familyCard);
+            });
         }
 
         function selectFamily(familyId, familyName) {
@@ -1296,7 +1359,7 @@
             }
 
             const selectedFamilies = Array.from(document.querySelectorAll('#newTripFamilies input[type="checkbox"]:checked'))
-                .map(cb => ({ id: cb.dataset.familyId, name: cb.dataset.familyName }));
+                .map(cb => ({ id: parseInt(cb.dataset.familyId), name: cb.dataset.familyName }));
 
             if (selectedFamilies.length === 0) {
                 alert('Please select at least one family for this trip');
@@ -1311,16 +1374,11 @@
                     body: JSON.stringify({ tripId })
                 });
 
-                // Generate meal calendar skeleton (placeholder rows for rendering)
-                const start = new Date(startDate);
-                for (let i = 0; i < numDays; i++) {
-                    const currentDate = new Date(start);
-                    currentDate.setDate(start.getDate() + i);
-                    const dateKey = currentDate.toISOString().split('T')[0];
-                    
-                    // Create placeholder meals so calendar renders
-                    // (User will fill in actual meals by clicking)
-                }
+                // Store calendar and family info
+                if (!window.tripCalendars) window.tripCalendars = {};
+                if (!window.tripFamilies) window.tripFamilies = {};
+                window.tripCalendars[tripId] = { startDate, numDays };
+                window.tripFamilies[tripId] = selectedFamilies;
 
                 document.getElementById('newTripId').value = '';
                 document.getElementById('newTripStartDate').value = '';
@@ -1330,11 +1388,6 @@
                 await loadTrips();
                 document.getElementById('tripSelect').value = tripId;
                 currentTrip = tripId;
-                
-                // Store calendar info on trip
-                window.tripCalendars = window.tripCalendars || {};
-                window.tripCalendars[tripId] = { startDate, numDays };
-                
                 await loadTripData();
                 alert(`Trip "${tripId}" created with ${selectedFamilies.length} families!`);
             } catch (err) {
