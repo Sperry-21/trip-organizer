@@ -524,7 +524,17 @@
             .tab-button { min-width: 80px; padding: 12px 10px; font-size: 12px; }
         }
         /* Mobile Responsiveness */
-        @media (max-width: 768px) {
+        /* Ultra-aggressive mobile calendar fix */
+        .calendar-grid-container {
+            display: flex !important;
+            flex-direction: column !important;
+        }
+        
+        .calendar-grid-container > div {
+            width: 100% !important;
+        }
+
+        @media (max-width: 1024px) {
             .calendar-header-row {
                 grid-template-columns: 1fr !important;
             }
