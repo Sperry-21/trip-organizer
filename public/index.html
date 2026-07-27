@@ -644,9 +644,11 @@
 
             .content {
                 padding: 12px;
-                overflow-y: auto;
+                flex: 1;
                 width: 100%;
                 box-sizing: border-box;
+                overflow-y: auto;
+                -webkit-overflow-scrolling: touch;
             }
 
             /* Calendar: single column on mobile, vertical layout */
@@ -835,8 +837,11 @@
 
         <!-- Logistics Banner -->
         <div id="logisticsBanner" style="background: #fff3cd; border: 1px solid #ffc107; border-radius: 6px; padding: 15px 20px; margin: 20px; display: none;">
-            <div style="font-weight: 600; color: #856404; margin-bottom: 8px;">📋 Logistics</div>
-            <ul id="logisticsItems" style="margin: 0; padding-left: 20px; color: #856404; font-size: 14px;"></ul>
+            <div style="display: flex; justify-content: space-between; align-items: center; cursor: pointer;" onclick="toggleLogistics()">
+                <div style="font-weight: 600; color: #856404; margin-bottom: 0;">📋 Logistics</div>
+                <span id="logisticsToggle" style="font-size: 18px; color: #856404;">▼</span>
+            </div>
+            <ul id="logisticsItems" style="margin: 8px 0 0 0; padding-left: 20px; color: #856404; font-size: 14px;"></ul>
         </div>
 
         <div class="tabs">
@@ -1825,6 +1830,18 @@
                 console.error('Error refreshing trip:', err);
             }
             await loadTripData();
+        }
+
+        function toggleLogistics() {
+            const items = document.getElementById('logisticsItems');
+            const toggle = document.getElementById('logisticsToggle');
+            if (items.style.display === 'none') {
+                items.style.display = 'block';
+                toggle.textContent = '▼';
+            } else {
+                items.style.display = 'none';
+                toggle.textContent = '▶';
+            }
         }
 
         function openMealModal(date, mealId = null) {
