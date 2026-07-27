@@ -878,10 +878,6 @@
 
         <!-- Meals Tab -->
         <div id="meals" class="content active">
-            <div id="mobileCalendarNotice" style="background: #e3f2fd; border: 1px solid #2196f3; border-radius: 6px; padding: 15px; margin-bottom: 20px; display: none; text-align: center;">
-                <div style="color: #1976d2; font-weight: 600; margin-bottom: 8px;">📱 Mobile View</div>
-                <div style="color: #1565c0; font-size: 13px;">The calendar works best on desktop. Use the Items & Other Stuff sections below, or visit on a computer.</div>
-            </div>
             <div id="mealNoCalendar" style="text-align: center; padding: 40px; background: #f9f9f9; border-radius: 8px; margin: 20px;">
                 <div style="font-size: 18px; font-weight: 600; color: #333; margin-bottom: 10px;">📅 Calendar Not Generated</div>
                 <div style="color: #666; margin-bottom: 20px;">Go to the Admin tab to generate this trip's meal calendar</div>
@@ -1068,10 +1064,6 @@
 
         // Initialize
         async function init() {
-            // Show mobile notice if on small screen
-            if (window.innerWidth <= 1024) {
-                document.getElementById('mobileCalendarNotice').style.display = 'block';
-            }
             setupEventListeners();  // Set up listeners first
             await loadFamilies();
             await loadTrips();  // This will now trigger change event
@@ -1634,10 +1626,15 @@
         }
 
         function renderMeals(meals) {
+            try {
             const calendar = document.getElementById('mealCalendar');
-            if (!calendar) return;
+            if (!calendar) {
+                console.error('mealCalendar element not found!');
+                return;
+            }
             
             if (!window.tripCalendars || !window.tripCalendars[currentTrip]) {
+                console.warn('No calendar data for trip:', currentTrip);
                 calendar.innerHTML = '<div style="padding: 20px; text-align: center; color: #999;">No calendar set up for this trip. Create one in the Admin tab.</div>';
                 return;
             }
@@ -1657,7 +1654,9 @@
             });
 
             // MOBILE CHECK: Use different layout based on screen width
-            const isMobile = window.innerWidth < 1024;
+            // Fallback: if viewport < 1024 OR if it looks like mobile (high DPI + small)
+            const isMobile = window.innerWidth < 1024 || (window.devicePixelRatio > 1.5 && window.innerWidth < 500);
+            console.log('Render meals - Mobile check:', { innerWidth: window.innerWidth, isMobile, devicePixelRatio: window.devicePixelRatio });
             
             // Container - FLEX COLUMN on mobile, GRID on desktop
             const container = document.createElement('div');
@@ -1782,6 +1781,10 @@
             }
 
             calendar.appendChild(container);
+            } catch (err) {
+                console.error('Error rendering meals:', err);
+                document.getElementById('mealCalendar').innerHTML = '<div style="color: red; padding: 20px;">Error rendering calendar. Check console.</div>';
+            }
         }
 
 
