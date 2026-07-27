@@ -1015,7 +1015,16 @@
                                 startDate: tripData.start_date, 
                                 numDays: tripData.num_days 
                             };
-                            window.tripFamilies[currentTrip] = tripData.families ? JSON.parse(tripData.families) : [];
+                            // Handle families as either JSON string or array
+                            let families = tripData.families;
+                            if (typeof families === 'string') {
+                                try {
+                                    families = JSON.parse(families);
+                                } catch (e) {
+                                    families = [];
+                                }
+                            }
+                            window.tripFamilies[currentTrip] = families || [];
                         }
                     } catch (err) {
                         console.error('Error fetching trip metadata:', err);
