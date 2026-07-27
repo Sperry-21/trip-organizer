@@ -1025,11 +1025,14 @@
                                 }
                             }
                             window.tripFamilies[currentTrip] = families || [];
+                        } else {
+                            console.warn('Trip metadata incomplete:', tripData);
                         }
                     } catch (err) {
                         console.error('Error fetching trip metadata:', err);
                     }
-                    loadTripData();
+                    // Always call loadTripData, even if metadata is incomplete
+                    await loadTripData();
                 }
             });
 
@@ -1702,6 +1705,40 @@
             } catch (err) {
                 console.error('Error loading logistics:', err);
             }
+        }
+
+        async function refreshCurrentTrip() {
+            if (!currentTrip) {
+                console.warn('No trip selected');
+                return;
+            }
+            console.log('Refreshing trip:', currentTrip);
+            try {
+                const res = await fetch(`/api/trips/${currentTrip}`);
+                const tripData = res.ok ? await res.json() : null;
+                console.log('Trip metadata:', tripData);
+                if (tripData && tripData.start_date && tripData.num_days) {
+                    if (!window.tripCalendars) window.tripCalendars = {};
+                    if (!window.tripFamilies) window.tripFamilies = {};
+                    window.tripCalendars[currentTrip] = { 
+                        startDate: tripData.start_date, 
+                        numDays: tripData.num_days 
+                    };
+                    let families = tripData.families;
+                    if (typeof families === 'string') {
+                        try {
+                            families = JSON.parse(families);
+                        } catch (e) {
+                            families = [];
+                        }
+                    }
+                    window.tripFamilies[currentTrip] = families || [];
+                    console.log('Updated trip calendars:', window.tripCalendars);
+                }
+            } catch (err) {
+                console.error('Error refreshing trip:', err);
+            }
+            await loadTripData();
         }
 
         function openMealModal(date, mealId = null) {
