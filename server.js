@@ -86,20 +86,44 @@ app.post('/api/trips', async (req, res) => {
     // Always insert metadata (even if some fields are null)
     try {
       const familiesJson = families ? JSON.stringify(families) : null;
-      const formattedDate = startDate ? new Date(startDate).toISOString().split('T')[0] : null;
+      
+      // Handle multiple date formats: YYYY-MM-DD (from date input) or mm/dd/yyyy (from form)
+      let formattedDate = null;
+      if (startDate) {
+        if (startDate.includes('-')) {
+          // Already YYYY-MM-DD format
+          formattedDate = startDate;
+        } else if (startDate.includes('/')) {
+          // mm/dd/yyyy format - convert to YYYY-MM-DD
+          const parts = startDate.split('/');
+          if (parts.length === 3) {
+            const [month, day, year] = parts;
+            formattedDate = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+          }
+        } else {
+          // Try parsing as generic date
+          const parsed = new Date(startDate);
+          if (!isNaN(parsed)) {
+            formattedDate = parsed.toISOString().split('T')[0];
+          }
+        }
+      }
+      
       const parsedNumDays = numDays ? parseInt(numDays) : null;
       
-      console.log('Inserting metadata:', { tripId, formattedDate, parsedNumDays, familiesJson });
+      console.log('Inserting metadata:', { tripId, formattedDate, parsedNumDays, familiesCount: families?.length });
       
       await sql`INSERT INTO trip_metadata(trip_id, start_date, num_days, families) VALUES(${ tripId }, ${ formattedDate }, ${ parsedNumDays }, ${ familiesJson })`;
+      console.log('Metadata inserted successfully');
     } catch (metaErr) {
       console.error('Error inserting metadata:', metaErr);
+      console.error('Full error:', JSON.stringify(metaErr, null, 2));
       return res.status(500).json({ error: 'Failed to save trip metadata: ' + metaErr.message });
     }
 
     res.json({ success: true, tripId });
   } catch (err) {
-    console.error('Error creating trip:', err);
+    console.error('Error creating trip:', err.message);
     res.status(500).json({ error: err.message });
   }
 });
