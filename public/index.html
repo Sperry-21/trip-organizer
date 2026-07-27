@@ -649,19 +649,22 @@
                 box-sizing: border-box;
             }
 
-            /* Calendar: single column, no overflow */
+            /* Calendar: single column on mobile, vertical layout */
             .calendar-grid {
-                display: grid !important;
-                grid-template-columns: 1fr !important;
+                display: flex !important;
+                flex-direction: column !important;
                 gap: 8px !important;
                 width: 100%;
             }
 
             .calendar-grid > div {
-                min-height: 120px;
-                padding: 8px;
+                min-height: 80px;
+                padding: 10px;
                 word-break: break-word;
                 overflow-wrap: break-word;
+                border: 1px solid #ddd;
+                border-radius: 6px;
+                background: white;
             }
 
             /* Forms: single column */
