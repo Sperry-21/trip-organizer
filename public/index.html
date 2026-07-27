@@ -524,23 +524,14 @@
             .tab-button { min-width: 80px; padding: 12px 10px; font-size: 12px; }
         }
         /* Mobile Responsiveness */
-        /* Ultra-aggressive mobile calendar fix */
-        .calendar-grid {
-            display: flex !important;
-            flex-direction: column !important;
-        }
-        
-        .calendar-grid > div {
-            width: 100% !important;
-        }
-
-        .calendar-grid-container {
-            display: flex !important;
-            flex-direction: column !important;
-        }
-        
-        .calendar-grid-container > div {
-            width: 100% !important;
+        @media (max-width: 1024px) {
+            #mealCalendar {
+                display: none !important;
+            }
+            
+            .meals-legend {
+                display: none !important;
+            }
         }
 
         @media (max-width: 1024px) {
@@ -887,6 +878,10 @@
 
         <!-- Meals Tab -->
         <div id="meals" class="content active">
+            <div id="mobileCalendarNotice" style="background: #e3f2fd; border: 1px solid #2196f3; border-radius: 6px; padding: 15px; margin-bottom: 20px; display: none; text-align: center;">
+                <div style="color: #1976d2; font-weight: 600; margin-bottom: 8px;">📱 Mobile View</div>
+                <div style="color: #1565c0; font-size: 13px;">The calendar works best on desktop. Use the Items & Other Stuff sections below, or visit on a computer.</div>
+            </div>
             <div id="mealNoCalendar" style="text-align: center; padding: 40px; background: #f9f9f9; border-radius: 8px; margin: 20px;">
                 <div style="font-size: 18px; font-weight: 600; color: #333; margin-bottom: 10px;">📅 Calendar Not Generated</div>
                 <div style="color: #666; margin-bottom: 20px;">Go to the Admin tab to generate this trip's meal calendar</div>
@@ -1073,6 +1068,10 @@
 
         // Initialize
         async function init() {
+            // Show mobile notice if on small screen
+            if (window.innerWidth <= 1024) {
+                document.getElementById('mobileCalendarNotice').style.display = 'block';
+            }
             setupEventListeners();  // Set up listeners first
             await loadFamilies();
             await loadTrips();  // This will now trigger change event
@@ -1657,29 +1656,43 @@
                 mealsByDate[meal.meal_date].push(meal);
             });
 
-            // Single row calendar
-            const gridContainer = document.createElement('div');
-            gridContainer.style.display = 'grid';
-            gridContainer.style.gridTemplateColumns = `repeat(${numDays}, 1fr)`;
-            gridContainer.style.gap = '10px';
+            // MOBILE CHECK: Use different layout based on screen width
+            const isMobile = window.innerWidth < 1024;
+            
+            // Container - FLEX COLUMN on mobile, GRID on desktop
+            const container = document.createElement('div');
+            if (isMobile) {
+                container.style.display = 'flex';
+                container.style.flexDirection = 'column';
+                container.style.gap = '12px';
+            } else {
+                container.style.display = 'grid';
+                container.style.gridTemplateColumns = `repeat(${numDays}, 1fr)`;
+                container.style.gap = '10px';
+            }
 
-            // Date cells (linear, left-to-right)
+            // Date cells/cards
             for (let i = 0; i < numDays; i++) {
                 const currentDate = new Date(start);
                 currentDate.setDate(start.getDate() + i);
                 const dateKey = currentDate.toISOString().split('T')[0];
                 const dayName = currentDate.toLocaleDateString('en-US', { weekday: 'short' });
                 const dateNum = currentDate.getDate();
+                const monthStr = currentDate.toLocaleDateString('en-US', { month: 'short' });
 
                 const cell = document.createElement('div');
                 cell.style.border = '1px solid #ddd';
                 cell.style.borderRadius = '8px';
                 cell.style.padding = '12px';
-                cell.style.minHeight = '200px';
                 cell.style.background = '#fafafa';
                 cell.style.display = 'flex';
                 cell.style.flexDirection = 'column';
                 cell.style.gap = '8px';
+                
+                // Mobile: no min-height, Desktop: 200px
+                if (!isMobile) {
+                    cell.style.minHeight = '200px';
+                }
 
                 // Date header
                 const dateLabel = document.createElement('div');
@@ -1688,7 +1701,9 @@
                 dateLabel.style.textAlign = 'center';
                 dateLabel.style.paddingBottom = '8px';
                 dateLabel.style.borderBottom = '2px solid #ddd';
-                dateLabel.innerHTML = `<div style="font-size: 11px; color: #999;">${dayName}</div><div style="font-size: 16px; color: #333;">${dateNum}</div>`;
+                dateLabel.innerHTML = isMobile 
+                    ? `<div style="font-size: 12px; color: #999;">${dayName} ${monthStr} ${dateNum}</div>`
+                    : `<div style="font-size: 11px; color: #999;">${dayName}</div><div style="font-size: 16px; color: #333;">${dateNum}</div>`;
                 cell.appendChild(dateLabel);
 
                 // Meals section - sort by time of day
@@ -1755,16 +1770,18 @@
                 addBtn.style.cursor = 'pointer';
                 addBtn.style.fontSize = '12px';
                 addBtn.style.fontWeight = '600';
-                addBtn.style.marginTop = 'auto';
+                if (!isMobile) {
+                    addBtn.style.marginTop = 'auto';
+                }
                 addBtn.onclick = () => openMealModal(dateKey);
                 addBtn.onmouseover = () => addBtn.style.background = '#e8e8e8';
                 addBtn.onmouseout = () => addBtn.style.background = '#f0f0f0';
                 cell.appendChild(addBtn);
 
-                gridContainer.appendChild(cell);
+                container.appendChild(cell);
             }
 
-            calendar.appendChild(gridContainer);
+            calendar.appendChild(container);
         }
 
 
