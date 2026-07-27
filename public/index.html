@@ -1634,12 +1634,14 @@
             }
             
             if (!window.tripCalendars || !window.tripCalendars[currentTrip]) {
-                console.warn('No calendar data for trip:', currentTrip);
+                console.warn('No calendar data for trip:', currentTrip, 'available calendars:', window.tripCalendars);
                 calendar.innerHTML = '<div style="padding: 20px; text-align: center; color: #999;">No calendar set up for this trip. Create one in the Admin tab.</div>';
                 return;
             }
 
-            const { startDate, numDays } = window.tripCalendars[currentTrip];
+            const calData = window.tripCalendars[currentTrip];
+            console.log('Rendering calendar for trip', currentTrip, 'with data:', calData);
+            const { startDate, numDays } = calData;
             calendar.innerHTML = '';
 
             const start = new Date(startDate);
