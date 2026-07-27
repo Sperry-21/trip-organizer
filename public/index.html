@@ -1059,12 +1059,34 @@
                 allTrips = await res.json();
                 const select = document.getElementById('tripSelect');
                 select.innerHTML = '<option value="">-- Select Trip --</option>';
-                allTrips.forEach(trip => {
-                    const opt = document.createElement('option');
-                    opt.value = trip;
-                    opt.textContent = trip;
-                    select.appendChild(opt);
-                });
+                
+                // Fetch metadata for each trip to show dates
+                for (const trip of allTrips) {
+                    try {
+                        const metaRes = await fetch(`/api/trips/${trip}`);
+                        const tripData = metaRes.ok ? await metaRes.json() : null;
+                        
+                        const opt = document.createElement('option');
+                        opt.value = trip;
+                        
+                        // Build descriptive text with dates if available
+                        let displayText = trip;
+                        if (tripData?.start_date && tripData?.num_days) {
+                            const startDate = new Date(tripData.start_date);
+                            const startStr = startDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                            displayText += ` • ${startStr} • ${tripData.num_days}d`;
+                        }
+                        
+                        opt.textContent = displayText;
+                        select.appendChild(opt);
+                    } catch (err) {
+                        console.error('Error fetching metadata for trip:', trip, err);
+                        const opt = document.createElement('option');
+                        opt.value = trip;
+                        opt.textContent = trip;
+                        select.appendChild(opt);
+                    }
+                }
                 
                 // Default to most recent trip
                 if (allTrips.length > 0) {
@@ -1153,8 +1175,17 @@
                     }
 
                     if (tripData?.families) {
-                        const families = JSON.parse(tripData.families);
-                        html += `<div style="font-size: 12px; color: #999;">👥 ${families.length} families</div>`;
+                        let families = tripData.families;
+                        if (typeof families === 'string') {
+                            try {
+                                families = JSON.parse(families);
+                            } catch (e) {
+                                families = [];
+                            }
+                        }
+                        if (Array.isArray(families)) {
+                            html += `<div style="font-size: 12px; color: #999;">👥 ${families.length} families</div>`;
+                        }
                     }
 
                     card.innerHTML = html;
