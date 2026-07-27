@@ -1065,7 +1065,34 @@
                 if (allTrips.length > 0) {
                     const mostRecent = allTrips[allTrips.length - 1];
                     select.value = mostRecent;
-                    select.dispatchEvent(new Event('change'));
+                    // Manually trigger the logic instead of relying on change event
+                    currentTrip = mostRecent;
+                    // Fetch trip metadata
+                    try {
+                        const metaRes = await fetch(`/api/trips/${currentTrip}`);
+                        const tripData = metaRes.ok ? await metaRes.json() : null;
+                        if (tripData && tripData.start_date && tripData.num_days) {
+                            if (!window.tripCalendars) window.tripCalendars = {};
+                            if (!window.tripFamilies) window.tripFamilies = {};
+                            window.tripCalendars[currentTrip] = { 
+                                startDate: tripData.start_date, 
+                                numDays: tripData.num_days 
+                            };
+                            // Handle families as either JSON string or array
+                            let families = tripData.families;
+                            if (typeof families === 'string') {
+                                try {
+                                    families = JSON.parse(families);
+                                } catch (e) {
+                                    families = [];
+                                }
+                            }
+                            window.tripFamilies[currentTrip] = families || [];
+                        }
+                    } catch (err) {
+                        console.error('Error fetching trip metadata:', err);
+                    }
+                    await loadTripData();
                 }
                 
                 await renderExistingTrips();
