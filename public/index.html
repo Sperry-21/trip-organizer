@@ -523,6 +523,259 @@
             .tabs { overflow-x: auto; }
             .tab-button { min-width: 80px; padding: 12px 10px; font-size: 12px; }
         }
+        /* Mobile Responsiveness */
+        @media (max-width: 768px) {
+            body {
+                font-size: 14px;
+                display: flex;
+                flex-direction: column;
+                height: 100vh;
+                margin: 0;
+                padding: 0;
+            }
+
+            .header {
+                padding: 12px;
+                flex-shrink: 0;
+                order: -1;
+            }
+
+            .header h1 {
+                font-size: 18px;
+                margin: 0 0 8px 0;
+            }
+
+            .header-controls {
+                flex-direction: row;
+                gap: 8px;
+                align-items: center;
+            }
+
+            .header-controls select {
+                flex: 1;
+                min-width: 120px;
+                padding: 8px;
+                font-size: 12px;
+            }
+
+            .header-controls button {
+                flex: 0 0 auto;
+                padding: 8px 12px;
+                font-size: 12px;
+                white-space: nowrap;
+            }
+
+            .container {
+                max-width: 100%;
+                padding: 0;
+                margin: 0;
+                flex: 1;
+                overflow-y: auto;
+                display: flex;
+                flex-direction: column;
+            }
+
+            .tabs {
+                display: grid;
+                grid-template-columns: repeat(4, 1fr);
+                gap: 0;
+                padding: 0;
+                background: white;
+                border-top: 1px solid #ddd;
+                flex-shrink: 0;
+                order: 1;
+            }
+
+            .tab-button {
+                flex: 1;
+                padding: 12px 8px;
+                font-size: 11px;
+                border: none;
+                border-top: 3px solid transparent;
+                background: white;
+                margin: 0;
+            }
+
+            .tab-button.active {
+                border-top: 3px solid #667eea;
+                color: #667eea;
+            }
+
+            #logisticsBanner {
+                padding: 10px 12px;
+                margin: 8px 12px;
+                font-size: 13px;
+            }
+
+            #logisticsBanner ul {
+                margin: 0;
+                padding-left: 16px;
+                font-size: 12px;
+            }
+
+            .content {
+                padding: 12px;
+                overflow-y: auto;
+            }
+
+            .calendar-grid {
+                display: grid !important;
+                grid-template-columns: 1fr !important;
+                gap: 8px !important;
+            }
+
+            .calendar-grid > div {
+                min-height: 120px;
+                padding: 8px;
+            }
+
+            .admin-form {
+                grid-template-columns: 1fr !important;
+                gap: 8px !important;
+            }
+
+            .admin-form input,
+            .admin-form select,
+            .admin-form textarea,
+            .admin-form button {
+                width: 100%;
+                padding: 10px;
+                font-size: 13px;
+            }
+
+            .admin-section {
+                margin-bottom: 12px;
+            }
+
+            .admin-section h3 {
+                font-size: 14px;
+                margin: 8px 0;
+            }
+
+            .modal-content {
+                width: 95vw !important;
+                max-height: 85vh !important;
+                margin: auto !important;
+                padding: 16px !important;
+                border-radius: 12px !important;
+            }
+
+            .modal-header {
+                font-size: 14px !important;
+                padding: 0 !important;
+                margin-bottom: 12px !important;
+            }
+
+            .modal-form {
+                grid-template-columns: 1fr !important;
+                gap: 8px !important;
+            }
+
+            .modal-form input,
+            .modal-form select,
+            .modal-form textarea {
+                width: 100%;
+                padding: 10px;
+                font-size: 13px;
+            }
+
+            .family-selector {
+                grid-template-columns: 1fr !important;
+                gap: 6px !important;
+            }
+
+            .family-btn {
+                width: 100%;
+                padding: 12px 10px;
+                font-size: 12px;
+            }
+
+            button {
+                min-height: 44px;
+                font-size: 13px;
+            }
+
+            .item-delete {
+                padding: 8px 10px !important;
+                font-size: 12px !important;
+            }
+
+            #newTripFamilies {
+                grid-template-columns: 1fr !important;
+                gap: 6px !important;
+            }
+
+            .category-group {
+                margin-bottom: 8px;
+            }
+
+            .category-header {
+                padding: 10px;
+                font-size: 13px;
+                font-weight: 600;
+            }
+
+            .category-items {
+                display: grid;
+                grid-template-columns: 1fr;
+                gap: 6px;
+                padding: 0 8px;
+            }
+
+            .item-row {
+                padding: 10px;
+                font-size: 12px;
+            }
+
+            .meals-legend {
+                display: flex;
+                gap: 12px;
+                padding: 10px 12px;
+                font-size: 12px;
+                background: #f9f9f9;
+                margin: 8px 12px;
+                border-radius: 6px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header {
+                padding: 10px;
+            }
+
+            .header h1 {
+                font-size: 16px;
+                margin: 0 0 6px 0;
+            }
+
+            .header-controls select {
+                font-size: 11px;
+                padding: 6px;
+            }
+
+            .header-controls button {
+                padding: 6px 10px;
+                font-size: 11px;
+            }
+
+            .modal-content {
+                max-height: 90vh !important;
+                width: 98vw !important;
+            }
+
+            .tab-button {
+                padding: 10px 6px;
+                font-size: 10px;
+            }
+
+            .content {
+                padding: 10px;
+            }
+
+            .admin-section h3 {
+                font-size: 13px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -560,7 +813,7 @@
             <div id="mealCalendar" class="calendar-grid"></div>
             
             <!-- Meals Legend -->
-            <div style="margin-top: 20px; padding: 15px; background: #f9f9f9; border-radius: 6px; display: flex; gap: 20px; font-size: 13px;">
+            <div class="meals-legend" style="margin-top: 20px; padding: 15px; background: #f9f9f9; border-radius: 6px; display: flex; gap: 20px; font-size: 13px;">
                 <div style="display: flex; align-items: center; gap: 8px;">
                     <div style="width: 12px; height: 12px; background: #667eea; border-radius: 2px;"></div>
                     <span>Main Meal</span>
