@@ -1521,7 +1521,9 @@
             // Header row
             const headerRow = document.createElement('div');
             headerRow.style.display = 'grid';
-            headerRow.style.gridTemplateColumns = 'repeat(7, 1fr)';
+            // Mobile: 1 column, Desktop: 7 columns (days of week)
+            const isMobile = window.innerWidth <= 768;
+            headerRow.style.gridTemplateColumns = isMobile ? '1fr' : 'repeat(7, 1fr)';
             headerRow.style.gap = '10px';
             headerRow.style.marginBottom = '15px';
 
@@ -1533,7 +1535,8 @@
                 cell.style.padding = '10px';
                 cell.style.background = '#eee';
                 cell.style.borderRadius = '6px';
-                headerRow.appendChild(cell);
+                cell.style.display = isMobile ? 'none' : 'block'; // Hide day headers on mobile
+                cell.appendChild(cell);
             });
 
             calendar.appendChild(headerRow);
@@ -1541,14 +1544,17 @@
             // Calendar grid
             const gridContainer = document.createElement('div');
             gridContainer.style.display = 'grid';
-            gridContainer.style.gridTemplateColumns = 'repeat(7, 1fr)';
+            // Mobile: 1 column, Desktop: 7 columns
+            gridContainer.style.gridTemplateColumns = isMobile ? '1fr' : 'repeat(7, 1fr)';
             gridContainer.style.gap = '10px';
 
             const firstDay = start.getDay();
-            // Empty cells before start date
-            for (let i = 0; i < firstDay; i++) {
-                const emptyCell = document.createElement('div');
-                gridContainer.appendChild(emptyCell);
+            // Empty cells before start date (only on desktop 7-column layout)
+            if (!isMobile) {
+                for (let i = 0; i < firstDay; i++) {
+                    const emptyCell = document.createElement('div');
+                    gridContainer.appendChild(emptyCell);
+                }
             }
 
             // Date cells
@@ -1560,13 +1566,13 @@
                 cell.style.border = '1px solid #ddd';
                 cell.style.borderRadius = '8px';
                 cell.style.padding = '15px';
-                cell.style.minHeight = '120px';
+                cell.style.minHeight = isMobile ? '80px' : '120px';
                 cell.style.background = '#fafafa';
                 cell.style.display = 'flex';
                 cell.style.flexDirection = 'column';
                 cell.style.gap = '10px';
 
-                const dateStr = currentDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                const dateStr = currentDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', weekday: 'short' });
                 const dateKey = currentDate.toISOString().split('T')[0];
 
                 const dateLabel = document.createElement('div');
