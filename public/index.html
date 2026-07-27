@@ -1615,12 +1615,17 @@
             const items = logisticsText.split('\n').filter(line => line.trim());
             
             try {
-                // Store in trip metadata
-                await fetch(`/api/trips/${currentTrip}`, {
+                const res = await fetch(`/api/trips/${currentTrip}`, {
                     method: 'PATCH',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ logistics: items })
                 });
+                
+                if (!res.ok) {
+                    throw new Error('Failed to save');
+                }
+                
+                alert('Logistics saved!');
                 await loadLogistics();
             } catch (err) {
                 console.error('Error saving logistics:', err);
@@ -1632,12 +1637,21 @@
             try {
                 const res = await fetch(`/api/trips/${currentTrip}`);
                 const tripData = res.ok ? await res.json() : null;
-                const logistics = tripData?.logistics || [];
+                let logistics = tripData?.logistics || [];
+                
+                // Handle if logistics is a JSON string
+                if (typeof logistics === 'string') {
+                    try {
+                        logistics = JSON.parse(logistics);
+                    } catch (e) {
+                        logistics = [];
+                    }
+                }
                 
                 const banner = document.getElementById('logisticsBanner');
                 const list = document.getElementById('logisticsItems');
                 
-                if (logistics.length > 0) {
+                if (logistics && logistics.length > 0) {
                     banner.style.display = 'block';
                     list.innerHTML = logistics.map(item => `<li>${item}</li>`).join('');
                 } else {
@@ -1645,7 +1659,10 @@
                 }
                 
                 // Also update admin textarea
-                document.getElementById('logisticsText').value = logistics.join('\n');
+                const textarea = document.getElementById('logisticsText');
+                if (textarea) {
+                    textarea.value = Array.isArray(logistics) ? logistics.join('\n') : '';
+                }
             } catch (err) {
                 console.error('Error loading logistics:', err);
             }
@@ -1673,6 +1690,18 @@
             // Set default selections
             selectMealType('Breakfast');
             selectMealCategory('Main Meal');
+            
+            // If editing existing meal, load its data
+            if (mealId) {
+                const existingMeal = window.allMeals?.find(m => m.id === mealId);
+                if (existingMeal) {
+                    document.getElementById('modalMealName').value = existingMeal.meal_name || '';
+                    document.getElementById('modalMealDescription').value = existingMeal.description || '';
+                    familySelect.value = existingMeal.family_id;
+                    selectMealType(existingMeal.meal_time);
+                    selectMealCategory(existingMeal.meal_category || 'Main Meal');
+                }
+            }
             
             document.getElementById('mealModal').classList.add('active');
         }

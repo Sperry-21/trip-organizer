@@ -96,9 +96,18 @@ app.post('/api/trips', async (req, res) => {
 app.get('/api/trips/:tripId', async (req, res) => {
   try {
     const { tripId } = req.params;
-    const result = await sql`SELECT t.*, m.start_date, m.num_days, m.families FROM trips t LEFT JOIN trip_metadata m ON t.trip_id = m.trip_id WHERE t.trip_id = ${ tripId }`;
+    const result = await sql`SELECT t.*, m.start_date, m.num_days, m.families, m.logistics FROM trips t LEFT JOIN trip_metadata m ON t.trip_id = m.trip_id WHERE t.trip_id = ${ tripId }`;
     if (result.rows.length === 0) return res.status(404).json({ error: 'Trip not found' });
-    res.json(result.rows[0]);
+    const trip = result.rows[0];
+    // Parse logistics if it's JSON
+    if (trip.logistics && typeof trip.logistics === 'string') {
+      try {
+        trip.logistics = JSON.parse(trip.logistics);
+      } catch (e) {
+        trip.logistics = [];
+      }
+    }
+    res.json(trip);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -189,10 +198,11 @@ app.get('/api/trips/:tripId/meals', async (req, res) => {
 app.post('/api/trips/:tripId/meals', async (req, res) => {
   try {
     const { tripId } = req.params;
-    let { meal_date, meal_time, meal_name, family_id, description } = req.body;
+    let { meal_date, meal_time, meal_name, family_id, description, meal_category } = req.body;
     // Normalize date to YYYY-MM-DD
     meal_date = new Date(meal_date).toISOString().split('T')[0];
-    await sql`INSERT INTO trip_meals(trip_id, meal_date, meal_time, meal_name, family_id, description) VALUES(${ tripId }, ${ meal_date }, ${ meal_time }, ${ meal_name || null}, ${ family_id }, ${ description || null})`;
+    meal_category = meal_category || 'Main Meal';
+    await sql`INSERT INTO trip_meals(trip_id, meal_date, meal_time, meal_name, family_id, description, meal_category) VALUES(${ tripId }, ${ meal_date }, ${ meal_time }, ${ meal_name || null}, ${ family_id }, ${ description || null}, ${ meal_category })`;
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -202,8 +212,8 @@ app.post('/api/trips/:tripId/meals', async (req, res) => {
 app.patch('/api/trips/:tripId/meals/:id', async (req, res) => {
   try {
     const { tripId, id } = req.params;
-    const { meal_name, family_id, description, meal_date, meal_time } = req.body;
-    await sql`UPDATE trip_meals SET meal_name = COALESCE(${ meal_name }, meal_name), family_id = COALESCE(${ family_id }, family_id), description = COALESCE(${ description }, description), meal_date = COALESCE(${ meal_date }, meal_date), meal_time = COALESCE(${ meal_time }, meal_time) WHERE id = ${ id } AND trip_id = ${ tripId } `;
+    const { meal_name, family_id, description, meal_date, meal_time, meal_category } = req.body;
+    await sql`UPDATE trip_meals SET meal_name = COALESCE(${ meal_name }, meal_name), family_id = COALESCE(${ family_id }, family_id), description = COALESCE(${ description }, description), meal_date = COALESCE(${ meal_date }, meal_date), meal_time = COALESCE(${ meal_time }, meal_time), meal_category = COALESCE(${ meal_category }, meal_category) WHERE id = ${ id } AND trip_id = ${ tripId } `;
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
