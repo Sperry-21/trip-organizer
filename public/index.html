@@ -525,6 +525,21 @@
         }
         /* Mobile Responsiveness */
         @media (max-width: 768px) {
+            .calendar-header-row {
+                grid-template-columns: 1fr !important;
+            }
+            
+            .calendar-header-row > div {
+                display: none !important;
+            }
+
+            .calendar-grid-container {
+                grid-template-columns: 1fr !important;
+            }
+
+            .calendar-day-cell {
+                min-height: 80px !important;
+            }
             body {
                 font-size: 14px;
                 display: flex;
@@ -1521,11 +1536,12 @@
             // Header row
             const headerRow = document.createElement('div');
             headerRow.style.display = 'grid';
-            // Mobile: 1 column, Desktop: 7 columns (days of week)
-            const isMobile = window.innerWidth <= 768;
-            headerRow.style.gridTemplateColumns = isMobile ? '1fr' : 'repeat(7, 1fr)';
+            // Check if we're on mobile by looking at computed styles or just use CSS to handle it
+            headerRow.style.gridTemplateColumns = 'repeat(7, 1fr)';
             headerRow.style.gap = '10px';
             headerRow.style.marginBottom = '15px';
+            // Let CSS override this with !important for mobile
+            headerRow.className = 'calendar-header-row';
 
             daysOfWeek.forEach(day => {
                 const cell = document.createElement('div');
@@ -1535,8 +1551,7 @@
                 cell.style.padding = '10px';
                 cell.style.background = '#eee';
                 cell.style.borderRadius = '6px';
-                cell.style.display = isMobile ? 'none' : 'block'; // Hide day headers on mobile
-                cell.appendChild(cell);
+                headerRow.appendChild(cell);
             });
 
             calendar.appendChild(headerRow);
@@ -1544,17 +1559,16 @@
             // Calendar grid
             const gridContainer = document.createElement('div');
             gridContainer.style.display = 'grid';
-            // Mobile: 1 column, Desktop: 7 columns
-            gridContainer.style.gridTemplateColumns = isMobile ? '1fr' : 'repeat(7, 1fr)';
+            gridContainer.style.gridTemplateColumns = 'repeat(7, 1fr)';
             gridContainer.style.gap = '10px';
+            // Let CSS override this with !important for mobile
+            gridContainer.className = 'calendar-grid-container';
 
             const firstDay = start.getDay();
-            // Empty cells before start date (only on desktop 7-column layout)
-            if (!isMobile) {
-                for (let i = 0; i < firstDay; i++) {
-                    const emptyCell = document.createElement('div');
-                    gridContainer.appendChild(emptyCell);
-                }
+            // Empty cells before start date
+            for (let i = 0; i < firstDay; i++) {
+                const emptyCell = document.createElement('div');
+                gridContainer.appendChild(emptyCell);
             }
 
             // Date cells
@@ -1566,13 +1580,14 @@
                 cell.style.border = '1px solid #ddd';
                 cell.style.borderRadius = '8px';
                 cell.style.padding = '15px';
-                cell.style.minHeight = isMobile ? '80px' : '120px';
+                cell.style.minHeight = '120px';
                 cell.style.background = '#fafafa';
                 cell.style.display = 'flex';
                 cell.style.flexDirection = 'column';
                 cell.style.gap = '10px';
+                cell.className = 'calendar-day-cell';
 
-                const dateStr = currentDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', weekday: 'short' });
+                const dateStr = currentDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
                 const dateKey = currentDate.toISOString().split('T')[0];
 
                 const dateLabel = document.createElement('div');
