@@ -1644,23 +1644,43 @@
             
             // Group meals by date
             const mealsByDate = {};
+            const allDates = [];
             meals.forEach(meal => {
                 const date = meal.meal_date || 'No Date';
-                if (!mealsByDate[date]) mealsByDate[date] = [];
+                if (!mealsByDate[date]) {
+                    mealsByDate[date] = [];
+                    allDates.push(date);
+                }
                 mealsByDate[date].push(meal);
             });
 
-            // SIMPLE: Just render as vertical list on ALL screens
+            allDates.sort();
+            
+            // SCREEN SIZE DETECTION
+            const isMobile = window.innerWidth < 768;
+            console.log('Screen width:', window.innerWidth, 'isMobile:', isMobile);
+
+            if (isMobile) {
+                // MOBILE: vertical list
+                renderMobileList(calendar, mealsByDate, allDates);
+            } else {
+                // DESKTOP: week grid
+                renderDesktopGrid(calendar, mealsByDate);
+            }
+            } catch (err) {
+                console.error('Error rendering meals:', err);
+                document.getElementById('mealCalendar').innerHTML = '<div style="color: red; padding: 20px; font-size: 12px;">Error: ' + err.message + '</div>';
+            }
+        }
+
+        function renderMobileList(calendar, mealsByDate, allDates) {
             const container = document.createElement('div');
             container.style.display = 'flex';
             container.style.flexDirection = 'column';
             container.style.gap = '12px';
 
-            // Sort dates and render each
-            Object.keys(mealsByDate).sort().forEach(dateKey => {
+            allDates.forEach(dateKey => {
                 const dayMeals = mealsByDate[dateKey];
-                
-                // Date card header
                 const dateCard = document.createElement('div');
                 dateCard.style.border = '1px solid #ddd';
                 dateCard.style.borderRadius = '8px';
@@ -1678,56 +1698,10 @@
                 dateHeader.textContent = dateKey;
                 dateCard.appendChild(dateHeader);
 
-                // Meals for this date
                 const mealOrder = { 'Breakfast': 1, 'Lunch': 2, 'Dinner': 3 };
                 dayMeals.sort((a, b) => (mealOrder[a.meal_time] || 999) - (mealOrder[b.meal_time] || 999));
-                
-                dayMeals.forEach(meal => {
-                    const mealDiv = document.createElement('div');
-                    mealDiv.style.padding = '10px';
-                    mealDiv.style.background = 'white';
-                    mealDiv.style.borderRadius = '4px';
-                    mealDiv.style.cursor = 'pointer';
-                    mealDiv.style.fontSize = '12px';
-                    const isKids = meal.meal_category === 'Kids Meal';
-                    mealDiv.style.borderLeft = isKids ? '4px solid #ff6b9d' : '4px solid #667eea';
-                    mealDiv.style.display = 'flex';
-                    mealDiv.style.justifyContent = 'space-between';
-                    mealDiv.style.alignItems = 'flex-start';
-                    mealDiv.style.gap = '8px';
-                    
-                    const contentDiv = document.createElement('div');
-                    contentDiv.style.flex = '1';
-                    contentDiv.onclick = () => openMealModal(dateKey, meal.id);
-                    contentDiv.style.cursor = 'pointer';
-                    contentDiv.innerHTML = `
-                        <div style="font-weight: 600; color: ${isKids ? '#ff6b9d' : '#667eea'}; font-size: 11px;">${meal.meal_time.toUpperCase()}${isKids ? ' 👶' : ''}</div>
-                        <div style="margin-top: 3px; color: #333; font-weight: 500; font-size: 13px;">${meal.family_name || 'Unknown'}</div>
-                        ${meal.meal_name ? `<div style="margin-top: 3px; color: #666; font-size: 11px;">${meal.meal_name}</div>` : ''}
-                    `;
-                    
-                    const deleteBtn = document.createElement('button');
-                    deleteBtn.textContent = '×';
-                    deleteBtn.style.background = 'none';
-                    deleteBtn.style.border = 'none';
-                    deleteBtn.style.color = '#ff6b9d';
-                    deleteBtn.style.fontSize = '18px';
-                    deleteBtn.style.cursor = 'pointer';
-                    deleteBtn.style.padding = '0';
-                    deleteBtn.style.fontWeight = 'bold';
-                    deleteBtn.onclick = (e) => {
-                        e.stopPropagation();
-                        deleteMeal(meal.id);
-                    };
-                    
-                    mealDiv.appendChild(contentDiv);
-                    mealDiv.appendChild(deleteBtn);
-                    mealDiv.onmouseover = () => mealDiv.style.background = '#f0f0f0';
-                    mealDiv.onmouseout = () => mealDiv.style.background = 'white';
-                    dateCard.appendChild(mealDiv);
-                });
+                dayMeals.forEach(meal => dateCard.appendChild(createMealEl(meal, dateKey)));
 
-                // Add meal button for this date
                 const addBtn = document.createElement('button');
                 addBtn.textContent = '+ Add Meal';
                 addBtn.style.padding = '8px';
@@ -1742,15 +1716,120 @@
                 addBtn.onmouseover = () => addBtn.style.background = '#e8e8e8';
                 addBtn.onmouseout = () => addBtn.style.background = '#f0f0f0';
                 dateCard.appendChild(addBtn);
-
                 container.appendChild(dateCard);
             });
 
             calendar.appendChild(container);
-            } catch (err) {
-                console.error('Error rendering meals:', err);
-                document.getElementById('mealCalendar').innerHTML = '<div style="color: red; padding: 20px; font-size: 12px;">Error: ' + err.message + '</div>';
+        }
+
+        function renderDesktopGrid(calendar, mealsByDate) {
+            if (!window.tripCalendars || !window.tripCalendars[currentTrip]) {
+                // No calendar, render as list instead
+                return renderMobileList(calendar, mealsByDate, Object.keys(mealsByDate).sort());
             }
+
+            const { startDate, numDays } = window.tripCalendars[currentTrip];
+            const start = new Date(startDate);
+            const gridContainer = document.createElement('div');
+            gridContainer.style.display = 'grid';
+            gridContainer.style.gridTemplateColumns = `repeat(${numDays}, 1fr)`;
+            gridContainer.style.gap = '10px';
+
+            for (let i = 0; i < numDays; i++) {
+                const currentDate = new Date(start);
+                currentDate.setDate(start.getDate() + i);
+                const dateKey = currentDate.toISOString().split('T')[0];
+                const dayName = currentDate.toLocaleDateString('en-US', { weekday: 'short' });
+                const dateNum = currentDate.getDate();
+
+                const cell = document.createElement('div');
+                cell.style.border = '1px solid #ddd';
+                cell.style.borderRadius = '8px';
+                cell.style.padding = '12px';
+                cell.style.minHeight = '200px';
+                cell.style.background = '#fafafa';
+                cell.style.display = 'flex';
+                cell.style.flexDirection = 'column';
+                cell.style.gap = '8px';
+
+                const dateLabel = document.createElement('div');
+                dateLabel.style.fontWeight = 'bold';
+                dateLabel.style.fontSize = '13px';
+                dateLabel.style.textAlign = 'center';
+                dateLabel.style.paddingBottom = '8px';
+                dateLabel.style.borderBottom = '2px solid #ddd';
+                dateLabel.innerHTML = `<div style="font-size: 11px; color: #999;">${dayName}</div><div style="font-size: 16px; color: #333;">${dateNum}</div>`;
+                cell.appendChild(dateLabel);
+
+                const dayMeals = mealsByDate[dateKey] || [];
+                const mealOrder = { 'Breakfast': 1, 'Lunch': 2, 'Dinner': 3 };
+                dayMeals.sort((a, b) => (mealOrder[a.meal_time] || 999) - (mealOrder[b.meal_time] || 999));
+                dayMeals.forEach(meal => cell.appendChild(createMealEl(meal, dateKey)));
+
+                const addBtn = document.createElement('button');
+                addBtn.textContent = '+ Add';
+                addBtn.style.padding = '8px';
+                addBtn.style.background = '#f0f0f0';
+                addBtn.style.color = '#667eea';
+                addBtn.style.border = '1px dashed #667eea';
+                addBtn.style.borderRadius = '4px';
+                addBtn.style.cursor = 'pointer';
+                addBtn.style.fontSize = '11px';
+                addBtn.style.fontWeight = '600';
+                addBtn.style.marginTop = 'auto';
+                addBtn.onclick = () => openMealModal(dateKey);
+                addBtn.onmouseover = () => addBtn.style.background = '#e8e8e8';
+                addBtn.onmouseout = () => addBtn.style.background = '#f0f0f0';
+                cell.appendChild(addBtn);
+                gridContainer.appendChild(cell);
+            }
+
+            calendar.appendChild(gridContainer);
+        }
+
+        function createMealEl(meal, dateKey) {
+            const mealDiv = document.createElement('div');
+            mealDiv.style.padding = '10px';
+            mealDiv.style.background = 'white';
+            mealDiv.style.borderRadius = '4px';
+            mealDiv.style.cursor = 'pointer';
+            mealDiv.style.fontSize = '12px';
+            const isKids = meal.meal_category === 'Kids Meal';
+            mealDiv.style.borderLeft = isKids ? '4px solid #ff6b9d' : '4px solid #667eea';
+            mealDiv.style.display = 'flex';
+            mealDiv.style.justifyContent = 'space-between';
+            mealDiv.style.alignItems = 'flex-start';
+            mealDiv.style.gap = '8px';
+            
+            const contentDiv = document.createElement('div');
+            contentDiv.style.flex = '1';
+            contentDiv.onclick = () => openMealModal(dateKey, meal.id);
+            contentDiv.style.cursor = 'pointer';
+            contentDiv.innerHTML = `
+                <div style="font-weight: 600; color: ${isKids ? '#ff6b9d' : '#667eea'}; font-size: 11px;">${meal.meal_time.toUpperCase()}${isKids ? ' 👶' : ''}</div>
+                <div style="margin-top: 3px; color: #333; font-weight: 500; font-size: 13px;">${meal.family_name || 'Unknown'}</div>
+                ${meal.meal_name ? `<div style="margin-top: 3px; color: #666; font-size: 11px;">${meal.meal_name}</div>` : ''}
+            `;
+            
+            const deleteBtn = document.createElement('button');
+            deleteBtn.textContent = '×';
+            deleteBtn.style.background = 'none';
+            deleteBtn.style.border = 'none';
+            deleteBtn.style.color = '#ff6b9d';
+            deleteBtn.style.fontSize = '18px';
+            deleteBtn.style.cursor = 'pointer';
+            deleteBtn.style.padding = '0';
+            deleteBtn.style.fontWeight = 'bold';
+            deleteBtn.onclick = (e) => {
+                e.stopPropagation();
+                deleteMeal(meal.id);
+            };
+            
+            mealDiv.appendChild(contentDiv);
+            mealDiv.appendChild(deleteBtn);
+            mealDiv.onmouseover = () => mealDiv.style.background = '#f0f0f0';
+            mealDiv.onmouseout = () => mealDiv.style.background = 'white';
+            return mealDiv;
         }
 
 
