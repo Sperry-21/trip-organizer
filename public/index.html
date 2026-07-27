@@ -2047,15 +2047,25 @@
                 window.tripCalendars[tripId] = { startDate, numDays };
                 window.tripFamilies[tripId] = selectedFamilies;
 
+                // Clear form
                 document.getElementById('newTripId').value = '';
                 document.getElementById('newTripStartDate').value = '';
                 document.getElementById('newTripDays').value = '7';
-                document.querySelectorAll('#newTripFamilies input[type="checkbox"]').forEach(cb => cb.checked = false);
+                document.querySelectorAll('#newTripFamilies button.selected').forEach(btn => {
+                    btn.classList.remove('selected');
+                    btn.style.background = '#f5f5f5';
+                    btn.style.color = '#999';
+                    btn.style.borderColor = '#ddd';
+                });
 
-                await loadTrips();
-                document.getElementById('tripSelect').value = tripId;
+                // Set as current trip and load data
                 currentTrip = tripId;
+                document.getElementById('tripSelect').value = tripId;
                 await loadTripData();
+                
+                // Refresh trips list in background
+                await renderExistingTrips();
+                
                 alert(`Trip "${tripId}" created with ${selectedFamilies.length} families!`);
             } catch (err) {
                 console.error('Error creating trip:', err);
