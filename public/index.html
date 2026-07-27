@@ -651,11 +651,11 @@
                 -webkit-overflow-scrolling: touch;
             }
 
-            /* Calendar: single column on mobile, vertical layout */
+            /* Calendar: single column vertical stack on mobile */
             .calendar-grid {
-                display: flex !important;
-                flex-direction: column !important;
-                gap: 8px !important;
+                display: grid !important;
+                grid-template-columns: 1fr !important;
+                gap: 10px !important;
                 width: 100%;
             }
 
