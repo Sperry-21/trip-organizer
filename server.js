@@ -78,17 +78,28 @@ app.post('/api/trips', async (req, res) => {
     const { tripId, startDate, numDays, families } = req.body;
     if (!tripId) return res.status(400).json({ error: 'tripId required' });
 
+    console.log('Creating trip:', { tripId, startDate, numDays, families });
+
     // Insert into trips table
     await sql`INSERT INTO trips(trip_id, name) VALUES(${ tripId }, ${ tripId })`;
 
-    // Insert metadata if provided
-    if (startDate && numDays) {
+    // Always insert metadata (even if some fields are null)
+    try {
       const familiesJson = families ? JSON.stringify(families) : null;
-      await sql`INSERT INTO trip_metadata(trip_id, start_date, num_days, families) VALUES(${ tripId }, ${ startDate }, ${ numDays }, ${ familiesJson })`;
+      const formattedDate = startDate ? new Date(startDate).toISOString().split('T')[0] : null;
+      const parsedNumDays = numDays ? parseInt(numDays) : null;
+      
+      console.log('Inserting metadata:', { tripId, formattedDate, parsedNumDays, familiesJson });
+      
+      await sql`INSERT INTO trip_metadata(trip_id, start_date, num_days, families) VALUES(${ tripId }, ${ formattedDate }, ${ parsedNumDays }, ${ familiesJson })`;
+    } catch (metaErr) {
+      console.error('Error inserting metadata:', metaErr);
+      return res.status(500).json({ error: 'Failed to save trip metadata: ' + metaErr.message });
     }
 
     res.json({ success: true, tripId });
   } catch (err) {
+    console.error('Error creating trip:', err);
     res.status(500).json({ error: err.message });
   }
 });

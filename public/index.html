@@ -1165,15 +1165,8 @@
 
                     let html = `<div style="font-weight: 600; font-size: 16px; margin-bottom: 10px; color: #667eea;">${tripId}</div>`;
                     
-                    if (tripData?.start_date && tripData?.num_days) {
-                        const startDate = new Date(tripData.start_date);
-                        const endDate = new Date(startDate);
-                        endDate.setDate(startDate.getDate() + tripData.num_days - 1);
-                        const startStr = startDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-                        const endStr = endDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-                        html += `<div style="font-size: 13px; color: #666; margin-bottom: 8px;">📅 ${startStr} - ${endStr} (${tripData.num_days} days)</div>`;
-                    }
-
+                    // Parse families to get count
+                    let familyCount = 0;
                     if (tripData?.families) {
                         let families = tripData.families;
                         if (typeof families === 'string') {
@@ -1184,8 +1177,23 @@
                             }
                         }
                         if (Array.isArray(families)) {
-                            html += `<div style="font-size: 12px; color: #999;">👥 ${families.length} families</div>`;
+                            familyCount = families.length;
                         }
+                    }
+                    
+                    // Show dates if available
+                    if (tripData?.start_date && tripData?.num_days) {
+                        const startDate = new Date(tripData.start_date);
+                        const endDate = new Date(startDate);
+                        endDate.setDate(startDate.getDate() + tripData.num_days - 1);
+                        const startStr = startDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                        const endStr = endDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                        html += `<div style="font-size: 13px; color: #666; margin-bottom: 8px;">📅 ${startStr} - ${endStr} (${tripData.num_days} days)</div>`;
+                    }
+                    
+                    // Always show family count
+                    if (familyCount > 0) {
+                        html += `<div style="font-size: 12px; color: #999;">👥 ${familyCount} families</div>`;
                     }
 
                     card.innerHTML = html;
