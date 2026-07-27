@@ -15,11 +15,24 @@ async function initDb() {
   try {
     await sql`CREATE TABLE IF NOT EXISTS families (id SERIAL PRIMARY KEY, name VARCHAR(255) NOT NULL UNIQUE, color VARCHAR(7) DEFAULT '#4a90e2', created_at TIMESTAMP DEFAULT NOW());`;
     await sql`CREATE TABLE IF NOT EXISTS trip_items (id BIGINT PRIMARY KEY, trip_id VARCHAR(255) NOT NULL, person VARCHAR(255) NOT NULL, item VARCHAR(255) NOT NULL, category VARCHAR(255) NOT NULL, notes TEXT, completed BOOLEAN DEFAULT false, created_at TIMESTAMP DEFAULT NOW());`;
-    await sql`CREATE TABLE IF NOT EXISTS trip_meals (id SERIAL PRIMARY KEY, trip_id VARCHAR(255) NOT NULL, meal_date DATE NOT NULL, meal_time VARCHAR(50), meal_name VARCHAR(255), family_id INTEGER REFERENCES families(id), description TEXT, created_at TIMESTAMP DEFAULT NOW());`;
+    await sql`CREATE TABLE IF NOT EXISTS trip_meals (id SERIAL PRIMARY KEY, trip_id VARCHAR(255) NOT NULL, meal_date DATE NOT NULL, meal_time VARCHAR(50), meal_name VARCHAR(255), family_id INTEGER REFERENCES families(id), meal_category VARCHAR(50) DEFAULT 'Main Meal', description TEXT, created_at TIMESTAMP DEFAULT NOW());`;
     await sql`CREATE TABLE IF NOT EXISTS trips (id SERIAL PRIMARY KEY,  trip_id VARCHAR(255) UNIQUE NOT NULL,  name VARCHAR(255),  created_at TIMESTAMP DEFAULT NOW())`;
-    await sql`CREATE TABLE IF NOT EXISTS trip_metadata (id SERIAL PRIMARY KEY, trip_id VARCHAR(255) UNIQUE NOT NULL REFERENCES trips(trip_id) ON DELETE CASCADE, start_date DATE, num_days INTEGER, families TEXT, created_at TIMESTAMP DEFAULT NOW());`;
-    await sql`CREATE TABLE IF NOT EXISTS trip_other_stuff ( id SERIAL PRIMARY KEY,  trip_id VARCHAR(255) NOT NULL,  family_id INTEGER REFERENCES families(id),  item TEXT NOT NULL,  created_at TIMESTAMP DEFAULT NOW()
-)`;
+    await sql`CREATE TABLE IF NOT EXISTS trip_metadata (id SERIAL PRIMARY KEY, trip_id VARCHAR(255) UNIQUE NOT NULL REFERENCES trips(trip_id) ON DELETE CASCADE, start_date DATE, num_days INTEGER, families TEXT, logistics TEXT, created_at TIMESTAMP DEFAULT NOW());`;
+    await sql`CREATE TABLE IF NOT EXISTS trip_other_stuff ( id SERIAL PRIMARY KEY,  trip_id VARCHAR(255) NOT NULL,  family_id INTEGER REFERENCES families(id),  item TEXT NOT NULL,  created_at TIMESTAMP DEFAULT NOW())`;
+
+    // Add logistics column to trip_metadata if it doesn't exist (for existing databases)
+    try {
+      await sql`ALTER TABLE trip_metadata ADD COLUMN logistics TEXT`;
+    } catch (e) {
+      // Column probably already exists, that's fine
+    }
+    
+    // Add meal_category column to trip_meals if it doesn't exist (for existing databases)
+    try {
+      await sql`ALTER TABLE trip_meals ADD COLUMN meal_category VARCHAR(50) DEFAULT 'Main Meal'`;
+    } catch (e) {
+      // Column probably already exists, that's fine
+    }
 
     const defaultFamilies = ['Castellot', 'Fallavollita', 'Perry', "O'Connell", 'Ava', 'Hallett', '2Paulz', 'Pete'];
     const colors = ['#667eea', '#764ba2', '#f093fb', '#4facfe', '#00f2fe', '#43e97b', '#fa709a', '#fee140'];
