@@ -168,7 +168,8 @@ app.patch('/api/trips/:tripId', async (req, res) => {
     const familiesJson = families ? JSON.stringify(families) : null;
     const logisticsJson = logistics ? JSON.stringify(logistics) : null;
     
-    await sql`UPDATE trip_metadata SET start_date = ${ startDate }, num_days = ${ numDays }, families = ${ familiesJson }, logistics = ${ logisticsJson } WHERE trip_id = ${ tripId }`;
+    // Use COALESCE to only update fields that are provided, keep existing values for others
+    await sql`UPDATE trip_metadata SET start_date = COALESCE(${ startDate }, start_date), num_days = COALESCE(${ numDays }, num_days), families = COALESCE(${ familiesJson }, families), logistics = COALESCE(${ logisticsJson }, logistics) WHERE trip_id = ${ tripId }`;
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
