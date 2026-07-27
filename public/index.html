@@ -1008,9 +1008,11 @@
                     try {
                         const res = await fetch(`/api/trips/${currentTrip}`);
                         const tripData = res.ok ? await res.json() : null;
-                        if (tripData && tripData.start_date && tripData.num_days) {
-                            if (!window.tripCalendars) window.tripCalendars = {};
-                            if (!window.tripFamilies) window.tripFamilies = {};
+                        if (!window.tripCalendars) window.tripCalendars = {};
+                        if (!window.tripFamilies) window.tripFamilies = {};
+                        
+                        if (tripData) {
+                            // Always set calendar data, even if partial
                             window.tripCalendars[currentTrip] = { 
                                 startDate: tripData.start_date, 
                                 numDays: tripData.num_days 
@@ -1026,12 +1028,12 @@
                             }
                             window.tripFamilies[currentTrip] = families || [];
                         } else {
-                            console.warn('Trip metadata incomplete:', tripData);
+                            console.warn('Trip metadata not found:', currentTrip);
                         }
                     } catch (err) {
                         console.error('Error fetching trip metadata:', err);
                     }
-                    // Always call loadTripData, even if metadata is incomplete
+                    // Always call loadTripData
                     await loadTripData();
                 }
             });
@@ -1074,9 +1076,11 @@
                     try {
                         const metaRes = await fetch(`/api/trips/${currentTrip}`);
                         const tripData = metaRes.ok ? await metaRes.json() : null;
-                        if (tripData && tripData.start_date && tripData.num_days) {
-                            if (!window.tripCalendars) window.tripCalendars = {};
-                            if (!window.tripFamilies) window.tripFamilies = {};
+                        if (!window.tripCalendars) window.tripCalendars = {};
+                        if (!window.tripFamilies) window.tripFamilies = {};
+                        
+                        if (tripData) {
+                            // Always set calendar data, even if partial
                             window.tripCalendars[currentTrip] = { 
                                 startDate: tripData.start_date, 
                                 numDays: tripData.num_days 
@@ -2097,7 +2101,18 @@
 
                 // Set as current trip and load data
                 currentTrip = tripId;
-                document.getElementById('tripSelect').value = tripId;
+                
+                // Add new trip to dropdown if not already there
+                const tripSelect = document.getElementById('tripSelect');
+                let option = Array.from(tripSelect.options).find(opt => opt.value === tripId);
+                if (!option) {
+                    option = document.createElement('option');
+                    option.value = tripId;
+                    option.textContent = tripId;
+                    tripSelect.appendChild(option);
+                }
+                tripSelect.value = tripId;
+                
                 await loadTripData();
                 
                 // Refresh trips list in background
