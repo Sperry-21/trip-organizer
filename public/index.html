@@ -1694,26 +1694,15 @@
 
         function renderMobileList(calendar, mealsByDate, allDates) {
             const container = document.createElement('div');
-            container.style.display = 'flex';
-            container.style.flexDirection = 'column';
-            container.style.gap = '12px';
+            container.style.cssText = 'display: flex !important; flex-direction: column !important; gap: 12px !important; visibility: visible !important; opacity: 1 !important;';
 
             allDates.forEach(dateKey => {
                 const dayMeals = mealsByDate[dateKey];
                 const dateCard = document.createElement('div');
-                dateCard.style.border = '1px solid #ddd';
-                dateCard.style.borderRadius = '8px';
-                dateCard.style.padding = '12px';
-                dateCard.style.background = '#f9f9f9';
-                dateCard.style.display = 'flex';
-                dateCard.style.flexDirection = 'column';
-                dateCard.style.gap = '8px';
+                dateCard.style.cssText = 'border: 1px solid #ddd; border-radius: 8px; padding: 12px; background: #f9f9f9; display: flex !important; flex-direction: column !important; gap: 8px; visibility: visible !important; opacity: 1 !important;';
 
                 const dateHeader = document.createElement('div');
-                dateHeader.style.fontWeight = 'bold';
-                dateHeader.style.fontSize = '14px';
-                dateHeader.style.paddingBottom = '8px';
-                dateHeader.style.borderBottom = '2px solid #ddd';
+                dateHeader.style.cssText = 'font-weight: bold; font-size: 14px; padding-bottom: 8px; border-bottom: 2px solid #ddd; visibility: visible !important;';
                 dateHeader.textContent = dateKey;
                 dateCard.appendChild(dateHeader);
 
@@ -1723,14 +1712,7 @@
 
                 const addBtn = document.createElement('button');
                 addBtn.textContent = '+ Add Meal';
-                addBtn.style.padding = '8px';
-                addBtn.style.background = '#f0f0f0';
-                addBtn.style.color = '#667eea';
-                addBtn.style.border = '1px dashed #667eea';
-                addBtn.style.borderRadius = '4px';
-                addBtn.style.cursor = 'pointer';
-                addBtn.style.fontSize = '12px';
-                addBtn.style.fontWeight = '600';
+                addBtn.style.cssText = 'padding: 8px; background: #f0f0f0; color: #667eea; border: 1px dashed #667eea; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600; visibility: visible !important;';
                 addBtn.onclick = () => openMealModal(dateKey);
                 addBtn.onmouseover = () => addBtn.style.background = '#e8e8e8';
                 addBtn.onmouseout = () => addBtn.style.background = '#f0f0f0';
@@ -1739,6 +1721,7 @@
             });
 
             calendar.appendChild(container);
+            console.log('✓ Mobile list rendered, calendar innerHTML:', calendar.children.length, 'children');
         }
 
         function renderDesktopGrid(calendar, mealsByDate) {
