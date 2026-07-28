@@ -1669,10 +1669,22 @@
 
             if (isMobile) {
                 console.log('→ Rendering MOBILE LIST');
-                renderMobileList(calendar, mealsByDate, allDates);
+                try {
+                    renderMobileList(calendar, mealsByDate, allDates);
+                    console.log('✓ Mobile list rendered successfully');
+                } catch (e) {
+                    console.error('❌ ERROR in renderMobileList:', e.message, e.stack);
+                    calendar.innerHTML = '<div style="color: red; padding: 20px;">Mobile render error: ' + e.message + '</div>';
+                }
             } else {
                 console.log('→ Rendering DESKTOP GRID');
-                renderDesktopGrid(calendar, mealsByDate);
+                try {
+                    renderDesktopGrid(calendar, mealsByDate);
+                    console.log('✓ Desktop grid rendered successfully');
+                } catch (e) {
+                    console.error('❌ ERROR in renderDesktopGrid:', e.message, e.stack);
+                    calendar.innerHTML = '<div style="color: red; padding: 20px;">Desktop render error: ' + e.message + '</div>';
+                }
             }
             } catch (err) {
                 console.error('Error rendering meals:', err);
