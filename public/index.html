@@ -1626,21 +1626,24 @@
         }
 
         function renderMeals(meals) {
+            console.log('★★★ renderMeals called with', meals ? meals.length : 'NULL', 'meals ★★★');
             try {
             const calendar = document.getElementById('mealCalendar');
             if (!calendar) {
-                console.error('mealCalendar element not found!');
+                console.error('❌ mealCalendar element not found!');
                 return;
             }
             
+            console.log('✓ mealCalendar element found');
             calendar.innerHTML = '';
             
             if (!meals || meals.length === 0) {
+                console.log('⚠️  No meals - showing empty message');
                 calendar.innerHTML = '<div style="padding: 20px; text-align: center; color: #999; font-size: 14px;">No meals added yet. Use the + Add Meal buttons to add some!</div>';
                 return;
             }
 
-            console.log('Rendering', meals.length, 'meals');
+            console.log('✓ Have', meals.length, 'meals to render');
             
             // Group meals by date
             const mealsByDate = {};
@@ -1656,15 +1659,19 @@
 
             allDates.sort();
             
-            // SCREEN SIZE DETECTION
-            const isMobile = window.innerWidth < 768;
-            console.log('Screen width:', window.innerWidth, 'isMobile:', isMobile);
+            // SCREEN SIZE DETECTION - More aggressive for mobile
+            const isMobile = window.innerWidth < 600;
+            console.log('=== RENDER MEALS DEBUG ===');
+            console.log('Screen width:', window.innerWidth);
+            console.log('isMobile (< 600):', isMobile);
+            console.log('Meal count:', meals.length);
+            console.log('Unique dates:', allDates.length);
 
             if (isMobile) {
-                // MOBILE: vertical list
+                console.log('→ Rendering MOBILE LIST');
                 renderMobileList(calendar, mealsByDate, allDates);
             } else {
-                // DESKTOP: week grid
+                console.log('→ Rendering DESKTOP GRID');
                 renderDesktopGrid(calendar, mealsByDate);
             }
             } catch (err) {
