@@ -525,9 +525,6 @@
         }
         /* Mobile Responsiveness */
         @media (max-width: 1024px) {
-            #mealCalendar {
-                display: none !important;
-            }
             
             .meals-legend {
                 display: none !important;
@@ -1629,6 +1626,8 @@
             console.log('★★★ renderMeals called with', meals ? meals.length : 'NULL', 'meals ★★★');
             try {
             const calendar = document.getElementById('mealCalendar');
+            const noCalendarMsg = document.getElementById('mealNoCalendar');
+            
             if (!calendar) {
                 console.error('❌ mealCalendar element not found!');
                 return;
@@ -1637,8 +1636,16 @@
             console.log('✓ mealCalendar element found');
             calendar.innerHTML = '';
             
+            // HIDE the "not generated" message
+            if (noCalendarMsg) {
+                noCalendarMsg.style.display = 'none';
+            }
+            
             if (!meals || meals.length === 0) {
                 console.log('⚠️  No meals - showing empty message');
+                if (noCalendarMsg) {
+                    noCalendarMsg.style.display = 'block';
+                }
                 calendar.innerHTML = '<div style="padding: 20px; text-align: center; color: #999; font-size: 14px;">No meals added yet. Use the + Add Meal buttons to add some!</div>';
                 return;
             }
