@@ -1726,7 +1726,7 @@
 
         function renderDesktopGrid(calendar, mealsByDate) {
             if (!window.tripCalendars || !window.tripCalendars[currentTrip]) {
-                // No calendar, render as list instead
+                console.log('⚠️ No tripCalendars data on desktop - falling back to mobile list');
                 return renderMobileList(calendar, mealsByDate, Object.keys(mealsByDate).sort());
             }
 
