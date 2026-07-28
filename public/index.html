@@ -1709,16 +1709,22 @@
                 const dateCard = document.createElement('div');
                 dateCard.style.cssText = 'border: 1px solid #ddd; border-radius: 8px; padding: 0; background: #f9f9f9; display: flex !important; flex-direction: column !important; gap: 0; visibility: visible !important; opacity: 1 !important;';
 
+                // Parse date to get day of week
+                const date = new Date(dateKey + 'T00:00:00');
+                const dayOfWeek = date.toLocaleDateString('en-US', { weekday: 'long' });
+                const formattedDate = date.toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: 'numeric' });
+                const displayDate = `${dayOfWeek} (${formattedDate})`;
+
                 // COLLAPSIBLE HEADER
                 const headerRow = document.createElement('div');
                 headerRow.style.cssText = 'display: flex; align-items: center; justify-content: space-between; padding: 12px; cursor: pointer; background: #f9f9f9; border-bottom: 1px solid #ddd; font-weight: bold; font-size: 14px;';
                 
                 const dateLabel = document.createElement('div');
-                dateLabel.textContent = dateKey;
+                dateLabel.textContent = displayDate;
                 
                 const toggleBtn = document.createElement('div');
-                toggleBtn.textContent = '▼';
-                toggleBtn.style.cssText = 'font-size: 12px; transition: transform 0.2s;';
+                toggleBtn.textContent = '+';
+                toggleBtn.style.cssText = 'font-size: 18px; font-weight: bold; color: #667eea; width: 24px; text-align: center;';
                 
                 headerRow.appendChild(dateLabel);
                 headerRow.appendChild(toggleBtn);
@@ -1726,7 +1732,7 @@
 
                 // COLLAPSIBLE CONTENT
                 const contentDiv = document.createElement('div');
-                contentDiv.style.cssText = 'display: flex; flex-direction: column; gap: 8px; padding: 12px; background: #f9f9f9;';
+                contentDiv.style.cssText = 'display: none; flex-direction: column; gap: 8px; padding: 12px; background: #f9f9f9;';
                 
                 const mealOrder = { 'Breakfast': 1, 'Lunch': 2, 'Dinner': 3 };
                 dayMeals.sort((a, b) => (mealOrder[a.meal_time] || 999) - (mealOrder[b.meal_time] || 999));
@@ -1745,18 +1751,16 @@
 
                 dateCard.appendChild(contentDiv);
 
-                // TOGGLE LOGIC
-                let isCollapsed = false;
+                // TOGGLE LOGIC - Default to COLLAPSED
+                let isCollapsed = true;
                 headerRow.onclick = () => {
                     isCollapsed = !isCollapsed;
                     if (isCollapsed) {
                         contentDiv.style.display = 'none';
-                        toggleBtn.textContent = '▶';
-                        toggleBtn.style.transform = 'none';
+                        toggleBtn.textContent = '+';
                     } else {
                         contentDiv.style.display = 'flex';
-                        toggleBtn.textContent = '▼';
-                        toggleBtn.style.transform = 'none';
+                        toggleBtn.textContent = '-';
                     }
                 };
 
