@@ -670,6 +670,7 @@
                 width: 100%;
                 box-sizing: border-box;
                 overflow-y: auto;
+                overflow-x: hidden;
                 -webkit-overflow-scrolling: touch;
             }
 
@@ -1706,24 +1707,59 @@
             allDates.forEach(dateKey => {
                 const dayMeals = mealsByDate[dateKey];
                 const dateCard = document.createElement('div');
-                dateCard.style.cssText = 'border: 1px solid #ddd; border-radius: 8px; padding: 12px; background: #f9f9f9; display: flex !important; flex-direction: column !important; gap: 8px; visibility: visible !important; opacity: 1 !important;';
+                dateCard.style.cssText = 'border: 1px solid #ddd; border-radius: 8px; padding: 0; background: #f9f9f9; display: flex !important; flex-direction: column !important; gap: 0; visibility: visible !important; opacity: 1 !important;';
 
-                const dateHeader = document.createElement('div');
-                dateHeader.style.cssText = 'font-weight: bold; font-size: 14px; padding-bottom: 8px; border-bottom: 2px solid #ddd; visibility: visible !important;';
-                dateHeader.textContent = dateKey;
-                dateCard.appendChild(dateHeader);
+                // COLLAPSIBLE HEADER
+                const headerRow = document.createElement('div');
+                headerRow.style.cssText = 'display: flex; align-items: center; justify-content: space-between; padding: 12px; cursor: pointer; background: #f9f9f9; border-bottom: 1px solid #ddd; font-weight: bold; font-size: 14px;';
+                
+                const dateLabel = document.createElement('div');
+                dateLabel.textContent = dateKey;
+                
+                const toggleBtn = document.createElement('div');
+                toggleBtn.textContent = '▼';
+                toggleBtn.style.cssText = 'font-size: 12px; transition: transform 0.2s;';
+                
+                headerRow.appendChild(dateLabel);
+                headerRow.appendChild(toggleBtn);
+                dateCard.appendChild(headerRow);
 
+                // COLLAPSIBLE CONTENT
+                const contentDiv = document.createElement('div');
+                contentDiv.style.cssText = 'display: flex; flex-direction: column; gap: 8px; padding: 12px; background: #f9f9f9;';
+                
                 const mealOrder = { 'Breakfast': 1, 'Lunch': 2, 'Dinner': 3 };
                 dayMeals.sort((a, b) => (mealOrder[a.meal_time] || 999) - (mealOrder[b.meal_time] || 999));
-                dayMeals.forEach(meal => dateCard.appendChild(createMealEl(meal, dateKey)));
+                dayMeals.forEach(meal => contentDiv.appendChild(createMealEl(meal, dateKey)));
 
                 const addBtn = document.createElement('button');
                 addBtn.textContent = '+ Add Meal';
                 addBtn.style.cssText = 'padding: 8px; background: #f0f0f0; color: #667eea; border: 1px dashed #667eea; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600; visibility: visible !important;';
-                addBtn.onclick = () => openMealModal(dateKey);
+                addBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    openMealModal(dateKey);
+                };
                 addBtn.onmouseover = () => addBtn.style.background = '#e8e8e8';
                 addBtn.onmouseout = () => addBtn.style.background = '#f0f0f0';
-                dateCard.appendChild(addBtn);
+                contentDiv.appendChild(addBtn);
+
+                dateCard.appendChild(contentDiv);
+
+                // TOGGLE LOGIC
+                let isCollapsed = false;
+                headerRow.onclick = () => {
+                    isCollapsed = !isCollapsed;
+                    if (isCollapsed) {
+                        contentDiv.style.display = 'none';
+                        toggleBtn.textContent = '▶';
+                        toggleBtn.style.transform = 'none';
+                    } else {
+                        contentDiv.style.display = 'flex';
+                        toggleBtn.textContent = '▼';
+                        toggleBtn.style.transform = 'none';
+                    }
+                };
+
                 container.appendChild(dateCard);
             });
 
