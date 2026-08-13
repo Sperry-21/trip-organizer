@@ -15,7 +15,7 @@ async function initDb() {
   try {
     await sql`CREATE TABLE IF NOT EXISTS families (id SERIAL PRIMARY KEY, name VARCHAR(255) NOT NULL UNIQUE, color VARCHAR(7) DEFAULT '#4a90e2', created_at TIMESTAMP DEFAULT NOW());`;
     await sql`CREATE TABLE IF NOT EXISTS trip_items (id BIGINT PRIMARY KEY, trip_id VARCHAR(255) NOT NULL, person VARCHAR(255) NOT NULL, item VARCHAR(255) NOT NULL, category VARCHAR(255) NOT NULL, notes TEXT, completed BOOLEAN DEFAULT false, created_at TIMESTAMP DEFAULT NOW());`;
-    await sql`CREATE TABLE IF NOT EXISTS trip_meals (id SERIAL PRIMARY KEY, trip_id VARCHAR(255) NOT NULL, meal_date DATE NOT NULL, meal_time VARCHAR(50), meal_name VARCHAR(255), family_id INTEGER REFERENCES families(id), meal_category VARCHAR(50) DEFAULT 'Main Meal', description TEXT, created_at TIMESTAMP DEFAULT NOW());`;
+    await sql`CREATE TABLE IF NOT EXISTS trip_meals (id SERIAL PRIMARY KEY, trip_id VARCHAR(255) NOT NULL, meal_date DATE NOT NULL, meal_time VARCHAR(50), meal_name VARCHAR(255), family_id INTEGER REFERENCES families(id), meal_category VARCHAR(50) DEFAULT 'Main Meal', description TEXT, headcount INTEGER, created_at TIMESTAMP DEFAULT NOW());`;
     await sql`CREATE TABLE IF NOT EXISTS trips (id SERIAL PRIMARY KEY,  trip_id VARCHAR(255) UNIQUE NOT NULL,  name VARCHAR(255),  created_at TIMESTAMP DEFAULT NOW())`;
     await sql`CREATE TABLE IF NOT EXISTS trip_metadata (id SERIAL PRIMARY KEY, trip_id VARCHAR(255) UNIQUE NOT NULL REFERENCES trips(trip_id) ON DELETE CASCADE, start_date DATE, num_days INTEGER, families TEXT, logistics TEXT, created_at TIMESTAMP DEFAULT NOW());`;
     await sql`CREATE TABLE IF NOT EXISTS trip_other_stuff ( id SERIAL PRIMARY KEY,  trip_id VARCHAR(255) NOT NULL,  family_id INTEGER REFERENCES families(id),  item TEXT NOT NULL,  created_at TIMESTAMP DEFAULT NOW())`;
@@ -30,6 +30,13 @@ async function initDb() {
     // Add meal_category column to trip_meals if it doesn't exist (for existing databases)
     try {
       await sql`ALTER TABLE trip_meals ADD COLUMN meal_category VARCHAR(50) DEFAULT 'Main Meal'`;
+    } catch (e) {
+      // Column probably already exists, that's fine
+    }
+
+    // Add headcount column to trip_meals if it doesn't exist (for existing databases)
+    try {
+      await sql`ALTER TABLE trip_meals ADD COLUMN headcount INTEGER`;
     } catch (e) {
       // Column probably already exists, that's fine
     }
@@ -247,11 +254,11 @@ app.get('/api/trips/:tripId/meals', async (req, res) => {
 app.post('/api/trips/:tripId/meals', async (req, res) => {
   try {
     const { tripId } = req.params;
-    let { meal_date, meal_time, meal_name, family_id, description, meal_category } = req.body;
+    let { meal_date, meal_time, meal_name, family_id, description, meal_category, headcount } = req.body;
     // Normalize date to YYYY-MM-DD
     meal_date = new Date(meal_date).toISOString().split('T')[0];
     meal_category = meal_category || 'Main Meal';
-    await sql`INSERT INTO trip_meals(trip_id, meal_date, meal_time, meal_name, family_id, description, meal_category) VALUES(${ tripId }, ${ meal_date }, ${ meal_time }, ${ meal_name || null}, ${ family_id }, ${ description || null}, ${ meal_category })`;
+    await sql`INSERT INTO trip_meals(trip_id, meal_date, meal_time, meal_name, family_id, description, meal_category, headcount) VALUES(${ tripId }, ${ meal_date }, ${ meal_time }, ${ meal_name || null}, ${ family_id }, ${ description || null}, ${ meal_category }, ${ headcount || null})`;
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -261,8 +268,8 @@ app.post('/api/trips/:tripId/meals', async (req, res) => {
 app.patch('/api/trips/:tripId/meals/:id', async (req, res) => {
   try {
     const { tripId, id } = req.params;
-    const { meal_name, family_id, description, meal_date, meal_time, meal_category } = req.body;
-    await sql`UPDATE trip_meals SET meal_name = COALESCE(${ meal_name }, meal_name), family_id = COALESCE(${ family_id }, family_id), description = COALESCE(${ description }, description), meal_date = COALESCE(${ meal_date }, meal_date), meal_time = COALESCE(${ meal_time }, meal_time), meal_category = COALESCE(${ meal_category }, meal_category) WHERE id = ${ id } AND trip_id = ${ tripId } `;
+    const { meal_name, family_id, description, meal_date, meal_time, meal_category, headcount } = req.body;
+    await sql`UPDATE trip_meals SET meal_name = COALESCE(${ meal_name }, meal_name), family_id = COALESCE(${ family_id }, family_id), description = COALESCE(${ description }, description), meal_date = COALESCE(${ meal_date }, meal_date), meal_time = COALESCE(${ meal_time }, meal_time), meal_category = COALESCE(${ meal_category }, meal_category), headcount = COALESCE(${ headcount }, headcount) WHERE id = ${ id } AND trip_id = ${ tripId } `;
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
