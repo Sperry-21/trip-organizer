@@ -2243,7 +2243,7 @@
                     const isKids = m.meal_category === 'Kids Meal';
                     return `
                         <div style="padding: 10px; background: white; border-radius: 4px; margin-bottom: 8px; border-left: 4px solid ${isKids ? '#ff6b9d' : '#667eea'}; cursor: pointer;" onclick="openMealModal('${m.meal_date}', ${m.id})">
-                            <div style="font-weight: 600; color: ${isKids ? '#ff6b9d' : '#667eea'}; font-size: 13px;">${day.toUpperCase()} ${m.meal_time}${isKids ? ' 👶' : ''}</div>
+                            <div style="font-weight: 600; color: ${isKids ? '#ff6b9d' : '#667eea'}; font-size: 13px;">${day.toUpperCase()} ${m.meal_time}${isKids ? ' 👶' : ''}${m.headcount ? ` • ${m.headcount} ppl` : ''}</div>
                             ${m.meal_name ? `<div style="margin-top: 4px; color: #333; font-weight: 500;">${m.meal_name}</div>` : ''}
                             ${m.description ? `<div style="margin-top: 4px; color: #666; font-size: 12px;">${m.description}</div>` : ''}
                         </div>
