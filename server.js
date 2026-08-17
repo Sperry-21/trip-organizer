@@ -121,11 +121,8 @@ app.post('/api/trips', async (req, res) => {
             formattedDate = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
           }
         } else {
-          // Try parsing as generic date
-          const parsed = new Date(startDate);
-          if (!isNaN(parsed)) {
-            formattedDate = parsed.toISOString().split('T')[0];
-          }
+          // Assume it's already in a parseable format, use as-is without timezone conversion
+          formattedDate = startDate;
         }
       }
       
