@@ -1387,8 +1387,16 @@
             if (!window.tripCalendars) window.tripCalendars = {};
             const calendar = window.tripCalendars[currentTrip];
             if (calendar?.startDate && calendar?.numDays) {
+                // Convert Date object to YYYY-MM-DD string if needed
+                let dateStr = calendar.startDate;
+                if (dateStr instanceof Date) {
+                    dateStr = dateStr.toISOString().split('T')[0];
+                } else if (typeof dateStr === 'string' && dateStr.includes('T')) {
+                    dateStr = dateStr.split('T')[0];
+                }
+                console.log('Auto-generating calendar with:', {dateStr, numDays: calendar.numDays});
                 // Auto-generate the meal calendar grid with the dates
-                generateMealCalendar(calendar.startDate, calendar.numDays);
+                generateMealCalendar(dateStr, calendar.numDays);
             }
             
             await loadMeals();
@@ -1538,16 +1546,27 @@
         }
 
         function generateMealCalendar(startDate, numDays) {
+            console.log('generateMealCalendar called with:', {startDate, numDays});
+            
             // If called without params, try to read from input fields (Admin tab)
             if (!startDate) startDate = document.getElementById('mealStartDate')?.value;
             if (!numDays) numDays = parseInt(document.getElementById('mealNumDays')?.value);
 
+            console.log('After reading inputs:', {startDate, numDays});
+
             if (!startDate || !numDays) {
+                console.error('Missing startDate or numDays, cannot generate calendar');
                 alert('Please enter start date and number of days');
                 return;
             }
 
             const calendar = document.getElementById('mealCalendar');
+            if (!calendar) {
+                console.error('mealCalendar element not found!');
+                return;
+            }
+            
+            console.log('Generating calendar for:', startDate, 'with', numDays, 'days');
             calendar.innerHTML = '';
 
             const start = new Date(startDate);
