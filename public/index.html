@@ -1383,6 +1383,7 @@
             if (!currentTrip) return;
             await loadFamilies();
             await loadItems();
+            await loadMeals();  // Load meals FIRST so we have data
             
             // Check if trip has dates, if so generate calendar automatically
             if (!window.tripCalendars) window.tripCalendars = {};
@@ -1403,7 +1404,6 @@
                 console.warn('⚠️ No calendar dates found, skipping generation');
             }
             
-            await loadMeals();
             await loadOtherStuff();
             await loadLogistics();
             updateFamilyViewButtons();
