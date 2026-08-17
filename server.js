@@ -17,7 +17,7 @@ async function initDb() {
     await sql`CREATE TABLE IF NOT EXISTS trip_items (id BIGINT PRIMARY KEY, trip_id VARCHAR(255) NOT NULL, person VARCHAR(255) NOT NULL, item VARCHAR(255) NOT NULL, category VARCHAR(255) NOT NULL, notes TEXT, completed BOOLEAN DEFAULT false, created_at TIMESTAMP DEFAULT NOW());`;
     await sql`CREATE TABLE IF NOT EXISTS trip_meals (id SERIAL PRIMARY KEY, trip_id VARCHAR(255) NOT NULL, meal_date DATE NOT NULL, meal_time VARCHAR(50), meal_name VARCHAR(255), family_id INTEGER REFERENCES families(id), meal_category VARCHAR(50) DEFAULT 'Main Meal', description TEXT, headcount INTEGER, created_at TIMESTAMP DEFAULT NOW());`;
     await sql`CREATE TABLE IF NOT EXISTS trips (id SERIAL PRIMARY KEY,  trip_id VARCHAR(255) UNIQUE NOT NULL,  name VARCHAR(255),  created_at TIMESTAMP DEFAULT NOW())`;
-    await sql`CREATE TABLE IF NOT EXISTS trip_metadata (id SERIAL PRIMARY KEY, trip_id VARCHAR(255) UNIQUE NOT NULL REFERENCES trips(trip_id) ON DELETE CASCADE, start_date DATE, num_days INTEGER, families TEXT, logistics TEXT, created_at TIMESTAMP DEFAULT NOW());`;
+    await sql`CREATE TABLE IF NOT EXISTS trip_metadata (id SERIAL PRIMARY KEY, trip_id VARCHAR(255) UNIQUE NOT NULL REFERENCES trips(trip_id) ON DELETE CASCADE, start_date TEXT, num_days INTEGER, families TEXT, logistics TEXT, created_at TIMESTAMP DEFAULT NOW());`;
     await sql`CREATE TABLE IF NOT EXISTS trip_other_stuff ( id SERIAL PRIMARY KEY,  trip_id VARCHAR(255) NOT NULL,  family_id INTEGER REFERENCES families(id),  item TEXT NOT NULL,  created_at TIMESTAMP DEFAULT NOW())`;
 
     // Add logistics column to trip_metadata if it doesn't exist (for existing databases)
@@ -130,7 +130,7 @@ app.post('/api/trips', async (req, res) => {
       
       console.log('Inserting metadata:', { tripId, formattedDate, parsedNumDays, familiesCount: families?.length });
       
-      await sql`INSERT INTO trip_metadata(trip_id, start_date, num_days, families) VALUES(${ tripId }, ${ formattedDate }::date, ${ parsedNumDays }, ${ familiesJson })`;
+      await sql`INSERT INTO trip_metadata(trip_id, start_date, num_days, families) VALUES(${ tripId }, ${ formattedDate }, ${ parsedNumDays }, ${ familiesJson })`;
       console.log('Metadata inserted successfully');
     } catch (metaErr) {
       console.error('Error inserting metadata:', metaErr);
@@ -173,7 +173,7 @@ app.patch('/api/trips/:tripId', async (req, res) => {
     const logisticsJson = logistics ? JSON.stringify(logistics) : null;
     
     // Use COALESCE to only update fields that are provided, keep existing values for others
-    await sql`UPDATE trip_metadata SET start_date = COALESCE(${ startDate }::date, start_date), num_days = COALESCE(${ numDays }, num_days), families = COALESCE(${ familiesJson }, families), logistics = COALESCE(${ logisticsJson }, logistics) WHERE trip_id = ${ tripId }`;
+    await sql`UPDATE trip_metadata SET start_date = COALESCE(${ startDate }, start_date), num_days = COALESCE(${ numDays }, num_days), families = COALESCE(${ familiesJson }, families), logistics = COALESCE(${ logisticsJson }, logistics) WHERE trip_id = ${ tripId }`;
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
