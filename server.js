@@ -34,6 +34,13 @@ async function initDb() {
       // Column probably already exists, that's fine
     }
 
+    // Migrate start_date from DATE to TEXT type (handles timezone conversion issue)
+    try {
+      await sql`ALTER TABLE trip_metadata ALTER COLUMN start_date TYPE TEXT USING start_date::text`;
+    } catch (e) {
+      // Column is probably already TEXT, that's fine
+    }
+
     // Add headcount column to trip_meals if it doesn't exist (for existing databases)
     try {
       await sql`ALTER TABLE trip_meals ADD COLUMN headcount INTEGER`;
