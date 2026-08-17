@@ -1379,13 +1379,16 @@
         }
 
         async function loadTripData() {
+            console.log('🔵 loadTripData called');
             if (!currentTrip) return;
-            await loadFamilies(); // Reload to get full list, then filter
+            await loadFamilies();
             await loadItems();
             
             // Check if trip has dates, if so generate calendar automatically
             if (!window.tripCalendars) window.tripCalendars = {};
             const calendar = window.tripCalendars[currentTrip];
+            console.log('📅 Calendar object:', calendar);
+            
             if (calendar?.startDate && calendar?.numDays) {
                 // Convert Date object to YYYY-MM-DD string if needed
                 let dateStr = calendar.startDate;
@@ -1394,9 +1397,10 @@
                 } else if (typeof dateStr === 'string' && dateStr.includes('T')) {
                     dateStr = dateStr.split('T')[0];
                 }
-                console.log('Auto-generating calendar with:', {dateStr, numDays: calendar.numDays});
-                // Auto-generate the meal calendar grid with the dates
+                console.log('✅ Calling generateMealCalendar with:', {dateStr, numDays: calendar.numDays});
                 generateMealCalendar(dateStr, calendar.numDays);
+            } else {
+                console.warn('⚠️ No calendar dates found, skipping generation');
             }
             
             await loadMeals();
@@ -1405,7 +1409,9 @@
             updateFamilyViewButtons();
             
             // Hide "not generated" message if calendar has dates
-            document.getElementById('mealNoCalendar').style.display = (calendar?.startDate && calendar?.numDays) ? 'none' : 'block';
+            const shouldHide = (calendar?.startDate && calendar?.numDays);
+            console.log('📍 Hiding mealNoCalendar?', shouldHide);
+            document.getElementById('mealNoCalendar').style.display = shouldHide ? 'none' : 'block';
         }
 
         async function loadItems() {
@@ -1546,13 +1552,9 @@
         }
 
         function generateMealCalendar(startDate, numDays) {
-            console.log('generateMealCalendar called with:', {startDate, numDays});
-            
-            // If called without params, try to read from input fields (Admin tab)
-            if (!startDate) startDate = document.getElementById('mealStartDate')?.value;
-            if (!numDays) numDays = parseInt(document.getElementById('mealNumDays')?.value);
-
-            console.log('After reading inputs:', {startDate, numDays});
+            console.log('🎯 generateMealCalendar CALLED with:', {startDate, numDays});
+            console.log('typeof startDate:', typeof startDate);
+            console.log('typeof numDays:', typeof numDays);
 
             if (!startDate || !numDays) {
                 console.error('Missing startDate or numDays, cannot generate calendar');
