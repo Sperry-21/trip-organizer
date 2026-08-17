@@ -1629,7 +1629,10 @@
                 cell.className = 'calendar-day-cell';
 
                 const dateStr = currentDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-                const dateKey = currentDate.toISOString().split('T')[0];
+                // Use local date string, not UTC ISO which causes timezone offset
+                const dateKey = currentDate.getFullYear() + '-' + 
+                                String(currentDate.getMonth() + 1).padStart(2, '0') + '-' + 
+                                String(currentDate.getDate()).padStart(2, '0');
 
                 const dateLabel = document.createElement('div');
                 dateLabel.textContent = dateStr;
