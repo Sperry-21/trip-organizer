@@ -35,16 +35,10 @@ async function initDb() {
     }
 
     // Migrate start_date from DATE to TEXT type (handles timezone conversion issue)
-    // This fixes old DATE values that were stored with timezone interpretation
     try {
-      await sql`ALTER TABLE trip_metadata ALTER COLUMN start_date TYPE TEXT USING (start_date::date + INTERVAL '1 day')::text`;
+      await sql`ALTER TABLE trip_metadata ALTER COLUMN start_date TYPE TEXT`;
     } catch (e) {
-      // Column is probably already TEXT, try the simpler conversion
-      try {
-        await sql`ALTER TABLE trip_metadata ALTER COLUMN start_date TYPE TEXT USING start_date::text`;
-      } catch (e2) {
-        // Column is already TEXT, that's fine
-      }
+      // Column is probably already TEXT, that's fine
     }
 
     // Add headcount column to trip_meals if it doesn't exist (for existing databases)
