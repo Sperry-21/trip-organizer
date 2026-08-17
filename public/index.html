@@ -1387,10 +1387,8 @@
             if (!window.tripCalendars) window.tripCalendars = {};
             const calendar = window.tripCalendars[currentTrip];
             if (calendar?.startDate && calendar?.numDays) {
-                // Auto-generate the meal calendar grid
-                document.getElementById('mealStartDate').value = calendar.startDate;
-                document.getElementById('mealNumDays').value = calendar.numDays;
-                generateMealCalendar();
+                // Auto-generate the meal calendar grid with the dates
+                generateMealCalendar(calendar.startDate, calendar.numDays);
             }
             
             await loadMeals();
@@ -1539,9 +1537,10 @@
             }
         }
 
-        function generateMealCalendar() {
-            const startDate = document.getElementById('mealStartDate').value;
-            const numDays = parseInt(document.getElementById('mealNumDays').value);
+        function generateMealCalendar(startDate, numDays) {
+            // If called without params, try to read from input fields (Admin tab)
+            if (!startDate) startDate = document.getElementById('mealStartDate')?.value;
+            if (!numDays) numDays = parseInt(document.getElementById('mealNumDays')?.value);
 
             if (!startDate || !numDays) {
                 alert('Please enter start date and number of days');
