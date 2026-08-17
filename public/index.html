@@ -1606,8 +1606,11 @@
             gridContainer.className = 'calendar-grid-container';
 
             const firstDay = start.getDay();
-            // Don't add empty cells - just start dates where they fall in the week
-            // Each date cell handles its own positioning via CSS Grid
+            // Add empty cells before start date to align to correct day of week
+            for (let i = 0; i < firstDay; i++) {
+                const emptyCell = document.createElement('div');
+                gridContainer.appendChild(emptyCell);
+            }
 
             // Date cells
             for (let i = 0; i < numDays; i++) {
