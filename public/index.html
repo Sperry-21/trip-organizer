@@ -1382,15 +1382,24 @@
             if (!currentTrip) return;
             await loadFamilies(); // Reload to get full list, then filter
             await loadItems();
+            
+            // Check if trip has dates, if so generate calendar automatically
+            if (!window.tripCalendars) window.tripCalendars = {};
+            const calendar = window.tripCalendars[currentTrip];
+            if (calendar?.startDate && calendar?.numDays) {
+                // Auto-generate the meal calendar grid
+                document.getElementById('mealStartDate').value = calendar.startDate;
+                document.getElementById('mealNumDays').value = calendar.numDays;
+                generateMealCalendar();
+            }
+            
             await loadMeals();
             await loadOtherStuff();
             await loadLogistics();
             updateFamilyViewButtons();
             
-            // Check if meals calendar has been generated
-            if (!window.tripCalendars) window.tripCalendars = {};
-            const hasCalendar = window.tripCalendars[currentTrip];
-            document.getElementById('mealNoCalendar').style.display = hasCalendar ? 'none' : 'block';
+            // Hide "not generated" message if calendar has dates
+            document.getElementById('mealNoCalendar').style.display = (calendar?.startDate && calendar?.numDays) ? 'none' : 'block';
         }
 
         async function loadItems() {
