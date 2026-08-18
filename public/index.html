@@ -1741,6 +1741,8 @@
                             startDate: tripData.start_date,
                             numDays: tripData.num_days
                         };
+                        // Generate the calendar grid FIRST (before meals render)
+                        generateMealCalendar(tripData.start_date, tripData.num_days);
                     }
                 }
                 
@@ -1820,6 +1822,11 @@
                 const currentDate = new Date(start);
                 currentDate.setDate(start.getDate() + i);
 
+                // Calculate dateKey first (YYYY-MM-DD format)
+                const dateKey = currentDate.getFullYear() + '-' + 
+                                String(currentDate.getMonth() + 1).padStart(2, '0') + '-' + 
+                                String(currentDate.getDate()).padStart(2, '0');
+
                 const cell = document.createElement('div');
                 cell.style.border = '1px solid #ddd';
                 cell.style.borderRadius = '8px';
@@ -1830,13 +1837,9 @@
                 cell.style.flexDirection = 'column';
                 cell.style.gap = '10px';
                 cell.className = 'calendar-day-cell';
+                cell.setAttribute('data-date-key', dateKey);  // Store dateKey for later lookup
 
                 const dateStr = currentDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-                // Use local date string, not UTC ISO which causes timezone offset
-                const dateKey = currentDate.getFullYear() + '-' + 
-                                String(currentDate.getMonth() + 1).padStart(2, '0') + '-' + 
-                                String(currentDate.getDate()).padStart(2, '0');
-
                 const dateLabel = document.createElement('div');
                 dateLabel.textContent = dateStr;
                 dateLabel.style.fontWeight = 'bold';
@@ -1874,7 +1877,6 @@
             }
             
             console.log('✓ mealCalendar element found');
-            calendar.innerHTML = '';
             
             // HIDE the "not generated" message
             if (noCalendarMsg) {
@@ -1917,6 +1919,7 @@
             if (isMobile) {
                 console.log('→ Rendering MOBILE LIST');
                 try {
+                    calendar.innerHTML = '';  // Clear ONLY for mobile
                     renderMobileList(calendar, mealsByDate, allDates);
                     console.log('✓ Mobile list rendered successfully');
                 } catch (e) {
@@ -1926,10 +1929,11 @@
             } else {
                 console.log('→ Rendering DESKTOP GRID');
                 try {
-                    renderDesktopGrid(calendar, mealsByDate);
-                    console.log('✓ Desktop grid rendered successfully');
+                    // For desktop: populate existing grid cells (don't clear)
+                    populateDesktopGridWithMeals(calendar, mealsByDate);
+                    console.log('✓ Desktop grid populated successfully');
                 } catch (e) {
-                    console.error('❌ ERROR in renderDesktopGrid:', e.message, e.stack);
+                    console.error('❌ ERROR in populateDesktopGridWithMeals:', e.message, e.stack);
                     calendar.innerHTML = '<div style="color: red; padding: 20px;">Desktop render error: ' + e.message + '</div>';
                 }
             }
@@ -2054,6 +2058,53 @@
             });
 
             calendar.appendChild(container);
+        }
+
+        function populateDesktopGridWithMeals(calendar, mealsByDate) {
+            console.log('populateDesktopGridWithMeals called with dates:', Object.keys(mealsByDate));
+            
+            // Find all day cells in the existing grid (they have class 'calendar-day-cell')
+            const dayCells = calendar.querySelectorAll('.calendar-day-cell');
+            console.log('Found', dayCells.length, 'day cells in grid');
+            
+            dayCells.forEach(cell => {
+                // Get the dateKey stored as a data attribute
+                const dateKey = cell.getAttribute('data-date-key');
+                if (!dateKey) {
+                    console.log('Cell has no data-date-key');
+                    return;
+                }
+                
+                console.log('Processing cell for date:', dateKey);
+                const dayMeals = mealsByDate[dateKey] || [];
+                
+                // Remove any existing meal divs (but keep the date label and add button)
+                const existingMeals = cell.querySelectorAll('[data-meal-id]');
+                existingMeals.forEach(el => el.remove());
+                
+                // Add meals to this cell
+                const mealOrder = { 'Breakfast': 1, 'Lunch': 2, 'Dinner': 3 };
+                dayMeals.sort((a, b) => (mealOrder[a.meal_time] || 999) - (mealOrder[b.meal_time] || 999));
+                
+                dayMeals.forEach(meal => {
+                    const mealDiv = document.createElement('div');
+                    mealDiv.setAttribute('data-meal-id', meal.id);
+                    mealDiv.style.cssText = 'padding: 6px; background: white; border-radius: 3px; border-left: 3px solid ' + (meal.meal_category === 'Kids Meal' ? '#ff6b9d' : '#667eea') + '; cursor: pointer; font-size: 11px;';
+                    mealDiv.onclick = () => openMealModal(dateKey, meal.id);
+                    
+                    const isKids = meal.meal_category === 'Kids Meal';
+                    const headcount = meal.headcount ? ` • ${meal.headcount}p` : '';
+                    mealDiv.innerHTML = `<strong style="color: ${isKids ? '#ff6b9d' : '#667eea'}; font-size: 10px;">${meal.meal_time}${isKids ? ' 👶' : ''}${headcount}</strong><div style="color: #333; font-size: 10px; margin-top: 2px;">${meal.meal_name || '(no name)'}</div>`;
+                    
+                    // Insert before the add button
+                    const addBtn = cell.querySelector('button');
+                    if (addBtn) {
+                        cell.insertBefore(mealDiv, addBtn);
+                    } else {
+                        cell.appendChild(mealDiv);
+                    }
+                });
+            });
         }
 
         function createMealEl(meal, dateKey) {
