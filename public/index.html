@@ -2206,7 +2206,9 @@
 
         function openMealModal(date, mealId = null) {
             mealModalData = { date, mealId, mealTime: 'Breakfast', mealCategory: 'Main Meal' };
-            const dateObj = new Date(date);
+            // Parse date string in local timezone (not UTC)
+            const [year, month, day] = date.split('-');
+            const dateObj = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
             const dateStr = dateObj.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
             document.getElementById('modalMealDate').value = dateStr;
             document.getElementById('modalMealName').value = '';
@@ -2439,12 +2441,14 @@
 
             document.getElementById('familyMeals').innerHTML = familyMeals.length ? 
                 familyMeals.map(m => {
-                    const dateObj = new Date(m.meal_date);
-                    const day = dateObj.toLocaleDateString('en-US', { weekday: 'short' });
+                    // Parse date string in local timezone (not UTC)
+                    const [year, month, day] = m.meal_date.split('-');
+                    const dateObj = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+                    const day_str = dateObj.toLocaleDateString('en-US', { weekday: 'short' });
                     const isKids = m.meal_category === 'Kids Meal';
                     return `
                         <div style="padding: 10px; background: white; border-radius: 4px; margin-bottom: 8px; border-left: 4px solid ${isKids ? '#ff6b9d' : '#667eea'}; cursor: pointer;" onclick="openMealModal('${m.meal_date}', ${m.id})">
-                            <div style="font-weight: 600; color: ${isKids ? '#ff6b9d' : '#667eea'}; font-size: 13px;">${day.toUpperCase()} ${m.meal_time}${isKids ? ' 👶' : ''}${m.headcount ? ` • ${m.headcount} ppl` : ''}</div>
+                            <div style="font-weight: 600; color: ${isKids ? '#ff6b9d' : '#667eea'}; font-size: 13px;">${day_str.toUpperCase()} ${m.meal_time}${isKids ? ' 👶' : ''}${m.headcount ? ` • ${m.headcount} ppl` : ''}</div>
                             ${m.meal_name ? `<div style="margin-top: 4px; color: #333; font-weight: 500;">${m.meal_name}</div>` : ''}
                             ${m.description ? `<div style="margin-top: 4px; color: #666; font-size: 12px;">${m.description}</div>` : ''}
                         </div>
