@@ -1251,14 +1251,20 @@
                 // Clone meals with adjusted dates
                 if (sourceTrip.start_date && sourceMeals.length > 0) {
                     const sourceStart = new Date(sourceTrip.start_date + 'T00:00:00');
+                    const newStart = new Date(newStartDateStr + 'T00:00:00');
                     
                     for (const meal of sourceMeals) {
                         const mealDate = new Date(meal.meal_date + 'T00:00:00');
                         const dayOffset = Math.floor((mealDate - sourceStart) / (1000 * 60 * 60 * 24));
                         
-                        const newDate = new Date(sourceStart);
+                        const newDate = new Date(newStart);
                         newDate.setDate(newDate.getDate() + dayOffset);
-                        const newDateStr = newDate.toISOString().split('T')[0];
+                        
+                        // Use local timezone date formatting instead of toISOString (which uses UTC)
+                        const year = newDate.getFullYear();
+                        const month = String(newDate.getMonth() + 1).padStart(2, '0');
+                        const day = String(newDate.getDate()).padStart(2, '0');
+                        const newDateStr = `${year}-${month}-${day}`;
 
                         await fetch(`/api/trips/${newTripName}/meals`, {
                             method: 'POST',
