@@ -15,7 +15,7 @@ async function initDb() {
   try {
     await sql`CREATE TABLE IF NOT EXISTS families (id SERIAL PRIMARY KEY, name VARCHAR(255) NOT NULL UNIQUE, color VARCHAR(7) DEFAULT '#4a90e2', created_at TIMESTAMP DEFAULT NOW());`;
     await sql`CREATE TABLE IF NOT EXISTS trip_items (id BIGINT PRIMARY KEY, trip_id VARCHAR(255) NOT NULL, person VARCHAR(255) NOT NULL, item VARCHAR(255) NOT NULL, category VARCHAR(255) NOT NULL, notes TEXT, completed BOOLEAN DEFAULT false, created_at TIMESTAMP DEFAULT NOW());`;
-    await sql`CREATE TABLE IF NOT EXISTS trip_meals (id SERIAL PRIMARY KEY, trip_id VARCHAR(255) NOT NULL, meal_date TEXT NOT NULL, meal_time VARCHAR(50), meal_name VARCHAR(255), family_id INTEGER REFERENCES families(id), meal_category VARCHAR(50) DEFAULT 'Main Meal', description TEXT, headcount INTEGER, created_at TIMESTAMP DEFAULT NOW());`;
+    await sql`CREATE TABLE IF NOT EXISTS trip_meals (id SERIAL PRIMARY KEY, trip_id VARCHAR(255) NOT NULL, meal_date DATE NOT NULL, meal_time VARCHAR(50), meal_name VARCHAR(255), family_id INTEGER REFERENCES families(id), meal_category VARCHAR(50) DEFAULT 'Main Meal', description TEXT, headcount INTEGER, created_at TIMESTAMP DEFAULT NOW());`;
     await sql`CREATE TABLE IF NOT EXISTS trips (id SERIAL PRIMARY KEY,  trip_id VARCHAR(255) UNIQUE NOT NULL,  name VARCHAR(255),  created_at TIMESTAMP DEFAULT NOW())`;
     await sql`CREATE TABLE IF NOT EXISTS trip_metadata (id SERIAL PRIMARY KEY, trip_id VARCHAR(255) UNIQUE NOT NULL REFERENCES trips(trip_id) ON DELETE CASCADE, start_date TEXT, num_days INTEGER, families TEXT, logistics TEXT, created_at TIMESTAMP DEFAULT NOW());`;
     await sql`CREATE TABLE IF NOT EXISTS trip_other_stuff ( id SERIAL PRIMARY KEY,  trip_id VARCHAR(255) NOT NULL,  family_id INTEGER REFERENCES families(id),  item TEXT NOT NULL,  created_at TIMESTAMP DEFAULT NOW())`;
@@ -37,13 +37,6 @@ async function initDb() {
     // Migrate start_date from DATE to TEXT type (handles timezone conversion issue)
     try {
       await sql`ALTER TABLE trip_metadata ALTER COLUMN start_date TYPE TEXT`;
-    } catch (e) {
-      // Column is probably already TEXT, that's fine
-    }
-
-    // Migrate meal_date from DATE to TEXT type (handles timezone conversion issue)
-    try {
-      await sql`ALTER TABLE trip_meals ALTER COLUMN meal_date TYPE TEXT`;
     } catch (e) {
       // Column is probably already TEXT, that's fine
     }
@@ -251,8 +244,12 @@ app.get('/api/trips/:tripId/meals', async (req, res) => {
   try {
     const { tripId } = req.params;
     const result = await sql`SELECT tm.*, f.name as family_name, f.color FROM trip_meals tm LEFT JOIN families f ON tm.family_id = f.id WHERE tm.trip_id = ${ tripId } ORDER BY tm.meal_date, tm.meal_time`;
-    // meal_date is already stored as TEXT (YYYY-MM-DD) in local timezone, no conversion needed
-    res.json(result.rows);
+    // Normalize meal_date to YYYY-MM-DD format
+    const meals = result.rows.map(meal => ({
+      ...meal,
+      meal_date: new Date(meal.meal_date).toISOString().split('T')[0]
+    }));
+    res.json(meals);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -262,8 +259,8 @@ app.post('/api/trips/:tripId/meals', async (req, res) => {
   try {
     const { tripId } = req.params;
     let { meal_date, meal_time, meal_name, family_id, description, meal_category, headcount } = req.body;
-    // Store meal_date as TEXT without timezone conversion
-    // Expect YYYY-MM-DD format from frontend (already in local timezone)
+    // Normalize date to YYYY-MM-DD
+    meal_date = new Date(meal_date).toISOString().split('T')[0];
     meal_category = meal_category || 'Main Meal';
     await sql`INSERT INTO trip_meals(trip_id, meal_date, meal_time, meal_name, family_id, description, meal_category, headcount) VALUES(${ tripId }, ${ meal_date }, ${ meal_time }, ${ meal_name || null}, ${ family_id }, ${ description || null}, ${ meal_category }, ${ headcount || null})`;
     res.json({ success: true });
