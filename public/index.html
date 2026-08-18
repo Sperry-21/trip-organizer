@@ -867,7 +867,7 @@
         </div>
 
         <div class="tabs">
-            <button class="tab-button active" data-tab="meals">Meals</button>
+            <button class="tab-button active" data-tab="meals">Meals & Other Food</button>
             <button class="tab-button" data-tab="items">Equipment & Supplies</button>
             <button class="tab-button" data-tab="family">Family View</button>
             <button class="tab-button" data-tab="admin">Admin</button>
@@ -2579,33 +2579,71 @@
                     background: white;
                 `;
 
-                // Family name header
+                // Family name header - clickable to collapse/expand
                 const headerDiv = document.createElement('div');
                 headerDiv.style.cssText = `
                     font-weight: 600;
                     font-size: 16px;
                     color: ${borderColor};
-                    margin-bottom: 15px;
+                    margin-bottom: 0;
                     padding-bottom: 10px;
+                    padding-top: 0;
                     border-bottom: 2px solid ${borderColor};
+                    cursor: pointer;
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    user-select: none;
                 `;
-                headerDiv.textContent = family.name;
+                
+                const familyNameSpan = document.createElement('span');
+                familyNameSpan.textContent = family.name;
+                headerDiv.appendChild(familyNameSpan);
+                
+                const chevron = document.createElement('span');
+                chevron.textContent = '▼';
+                chevron.style.cssText = `font-size: 12px; transition: transform 0.2s; transform: rotate(-90deg);`;
+                headerDiv.appendChild(chevron);
+                
                 card.appendChild(headerDiv);
+                
+                // Content wrapper - hidden by default
+                const contentWrapper = document.createElement('div');
+                contentWrapper.style.cssText = `
+                    display: none;
+                    padding-top: 15px;
+                `;
+                
+                // Track collapsed state
+                let isCollapsed = true;
+                
+                headerDiv.addEventListener('click', () => {
+                    isCollapsed = !isCollapsed;
+                    if (isCollapsed) {
+                        contentWrapper.style.display = 'none';
+                        chevron.style.transform = 'rotate(-90deg)';
+                    } else {
+                        contentWrapper.style.display = 'block';
+                        chevron.style.transform = 'rotate(0deg)';
+                    }
+                });
 
                 // Meals section
                 if (familyMeals.length > 0) {
                     const mealsLabel = document.createElement('div');
                     mealsLabel.style.cssText = `
-                        font-size: 11px;
-                        color: #999;
+                        font-size: 12px;
+                        color: ${borderColor};
                         font-weight: 600;
-                        margin-top: 12px;
-                        margin-bottom: 6px;
+                        margin-top: 14px;
+                        margin-bottom: 10px;
+                        padding-bottom: 8px;
+                        border-bottom: 2px solid ${borderColor};
                         text-transform: uppercase;
                         letter-spacing: 0.5px;
                     `;
                     mealsLabel.textContent = 'Meals';
-                    card.appendChild(mealsLabel);
+                    contentWrapper.appendChild(mealsLabel);
 
                     familyMeals.forEach(m => {
                         const [year, month, day] = m.meal_date.split('-');
@@ -2636,7 +2674,7 @@
                         mealName.textContent = hasNoFood ? `⚠️ NO FOOD` : m.meal_name;
                         mealDiv.appendChild(mealName);
 
-                        card.appendChild(mealDiv);
+                        contentWrapper.appendChild(mealDiv);
                     });
                 }
 
@@ -2644,22 +2682,24 @@
                 if (familyOtherStuff.length > 0) {
                     const otherLabel = document.createElement('div');
                     otherLabel.style.cssText = `
-                        font-size: 11px;
-                        color: #999;
+                        font-size: 12px;
+                        color: ${borderColor};
                         font-weight: 600;
-                        margin-top: 12px;
-                        margin-bottom: 6px;
+                        margin-top: 14px;
+                        margin-bottom: 10px;
+                        padding-bottom: 8px;
+                        border-bottom: 2px solid ${borderColor};
                         text-transform: uppercase;
                         letter-spacing: 0.5px;
                     `;
                     otherLabel.textContent = 'Other Food Items';
-                    card.appendChild(otherLabel);
+                    contentWrapper.appendChild(otherLabel);
 
                     familyOtherStuff.forEach(os => {
                         const itemDiv = document.createElement('div');
-                        itemDiv.style.cssText = 'padding: 5px 0; font-size: 12px; color: #333;';
+                        itemDiv.style.cssText = 'padding: 4px 0; font-size: 12px; color: #333;';
                         itemDiv.textContent = `• ${os.item}`;
-                        card.appendChild(itemDiv);
+                        contentWrapper.appendChild(itemDiv);
                     });
                 }
 
@@ -2667,16 +2707,18 @@
                 if (familyItems.length > 0) {
                     const itemsLabel = document.createElement('div');
                     itemsLabel.style.cssText = `
-                        font-size: 11px;
-                        color: #999;
+                        font-size: 12px;
+                        color: ${borderColor};
                         font-weight: 600;
-                        margin-top: 12px;
-                        margin-bottom: 6px;
+                        margin-top: 14px;
+                        margin-bottom: 10px;
+                        padding-bottom: 8px;
+                        border-bottom: 2px solid ${borderColor};
                         text-transform: uppercase;
                         letter-spacing: 0.5px;
                     `;
                     itemsLabel.textContent = 'Equipment & Supplies';
-                    card.appendChild(itemsLabel);
+                    contentWrapper.appendChild(itemsLabel);
 
                     // Group items by category
                     const itemsByCategory = {};
@@ -2691,22 +2733,22 @@
                     Object.entries(itemsByCategory).forEach(([category, categoryItems]) => {
                         const categoryLabel = document.createElement('div');
                         categoryLabel.style.cssText = `
-                            font-size: 11px;
-                            color: #999;
+                            font-size: 10px;
+                            color: #bbb;
                             font-weight: 600;
-                            margin-top: 8px;
-                            margin-bottom: 4px;
+                            margin-top: 10px;
+                            margin-bottom: 5px;
                             text-transform: uppercase;
                             letter-spacing: 0.5px;
                         `;
                         categoryLabel.textContent = category;
-                        card.appendChild(categoryLabel);
+                        contentWrapper.appendChild(categoryLabel);
 
                         categoryItems.forEach(item => {
                             const itemDiv = document.createElement('div');
                             itemDiv.style.cssText = 'padding: 4px 0; font-size: 12px; color: #333;';
                             itemDiv.innerHTML = `• ${item.item}${item.notes ? ` • ${item.notes}` : ''}`;
-                            card.appendChild(itemDiv);
+                            contentWrapper.appendChild(itemDiv);
                         });
                     });
                 }
@@ -2716,8 +2758,11 @@
                     const emptyDiv = document.createElement('div');
                     emptyDiv.style.cssText = 'color: #999; font-size: 12px; font-style: italic; text-align: center; padding: 20px;';
                     emptyDiv.textContent = 'No meals, food items, or bringing items assigned';
-                    card.appendChild(emptyDiv);
+                    contentWrapper.appendChild(emptyDiv);
                 }
+                
+                // Add content wrapper to card and card to container
+                card.appendChild(contentWrapper);
 
                 container.appendChild(card);
             });
