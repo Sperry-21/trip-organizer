@@ -1147,7 +1147,9 @@
                         // Build descriptive text with dates if available
                         let displayText = trip;
                         if (tripData?.start_date && tripData?.num_days) {
-                            const startDate = new Date(tripData.start_date);
+                            // Parse date string in local timezone (not UTC)
+                            const [year, month, day] = tripData.start_date.split('-');
+                            const startDate = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
                             const startStr = startDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
                             displayText += ` • ${startStr} • ${tripData.num_days}d`;
                         }
@@ -1226,7 +1228,8 @@
             if (!newNumDays) return;
 
             try {
-                await fetch(`/api/trips/${tripId}`, {
+                console.log('📤 Editing trip dates:', { tripId, newStartDate, newNumDays });
+                const patchRes = await fetch(`/api/trips/${tripId}`, {
                     method: 'PATCH',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -1234,9 +1237,13 @@
                         numDays: parseInt(newNumDays)
                     })
                 });
-                alert(`Trip dates updated!`);
-                await loadTrips();
-                await renderExistingTrips();
+                console.log('✓ PATCH response:', patchRes.status);
+                
+                // Wait a moment for DB to update
+                await new Promise(r => setTimeout(r, 1000));
+                
+                // Full page reload to ensure fresh data
+                window.location.reload();
             } catch (err) {
                 console.error('Error updating trip dates:', err);
                 alert('Failed to update dates');
@@ -1400,7 +1407,9 @@
                     
                     // Show dates if available
                     if (tripData?.start_date && tripData?.num_days) {
-                        const startDate = new Date(tripData.start_date);
+                        // Parse date string in local timezone (not UTC)
+                        const [year, month, day] = tripData.start_date.split('-');
+                        const startDate = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
                         const endDate = new Date(startDate);
                         endDate.setDate(startDate.getDate() + tripData.num_days - 1);
                         const startStr = startDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
