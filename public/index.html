@@ -868,7 +868,7 @@
 
         <div class="tabs">
             <button class="tab-button active" data-tab="meals">Meals</button>
-            <button class="tab-button" data-tab="items">Items</button>
+            <button class="tab-button" data-tab="items">Equipment & Supplies</button>
             <button class="tab-button" data-tab="family">Family View</button>
             <button class="tab-button" data-tab="admin">Admin</button>
         </div>
@@ -1563,6 +1563,7 @@
             try {
                 const res = await fetch(`/api/trips/${currentTrip}/items`);
                 const items = await res.json();
+                window.allItems = items;  // Store globally for Family View
                 renderItems(items);
             } catch (err) {
                 console.error('Error loading items:', err);
@@ -2674,7 +2675,7 @@
                         text-transform: uppercase;
                         letter-spacing: 0.5px;
                     `;
-                    itemsLabel.textContent = 'Bringing Items';
+                    itemsLabel.textContent = 'Equipment & Supplies';
                     card.appendChild(itemsLabel);
 
                     familyItems.forEach(item => {
