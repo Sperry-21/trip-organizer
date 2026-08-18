@@ -2550,6 +2550,7 @@
         function renderFamilyCards() {
             const container = document.getElementById('familyViewContent');
             container.innerHTML = '';
+            container.classList.add('active');  // Show the container
             
             // Set container to use grid layout for family cards
             container.style.cssText = `
