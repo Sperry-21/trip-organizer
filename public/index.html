@@ -1218,6 +1218,31 @@
             }
         }
 
+        async function editTripDates(tripId, currentStartDate, currentNumDays) {
+            const newStartDate = prompt('New start date (YYYY-MM-DD):', currentStartDate || '');
+            if (!newStartDate) return;
+
+            const newNumDays = prompt('Number of days:', currentNumDays || '5');
+            if (!newNumDays) return;
+
+            try {
+                await fetch(`/api/trips/${tripId}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        startDate: newStartDate,
+                        numDays: parseInt(newNumDays)
+                    })
+                });
+                alert(`Trip dates updated!`);
+                await loadTrips();
+                await renderExistingTrips();
+            } catch (err) {
+                console.error('Error updating trip dates:', err);
+                alert('Failed to update dates');
+            }
+        }
+
         async function cloneTrip(sourceTriipId) {
             const newTripName = prompt(`Clone "${sourceTriipId}" as:`, `${sourceTriipId}-copy`);
             if (!newTripName) return;
@@ -1427,6 +1452,25 @@
                         cloneTrip(tripId);
                     };
                     card.appendChild(cloneBtn);
+
+                    // Edit Dates button
+                    const editBtn = document.createElement('button');
+                    editBtn.textContent = '📅 Edit Dates';
+                    editBtn.style.width = '100%';
+                    editBtn.style.padding = '8px';
+                    editBtn.style.marginTop = '8px';
+                    editBtn.style.background = '#fff3e8';
+                    editBtn.style.color = '#d97706';
+                    editBtn.style.border = '1px solid #fed7aa';
+                    editBtn.style.borderRadius = '4px';
+                    editBtn.style.cursor = 'pointer';
+                    editBtn.style.fontSize = '12px';
+                    editBtn.style.fontWeight = '600';
+                    editBtn.onclick = (e) => {
+                        e.stopPropagation();
+                        editTripDates(tripId, tripData.start_date, tripData.num_days);
+                    };
+                    card.appendChild(editBtn);
                     
                     container.appendChild(card);
                 } catch (err) {
