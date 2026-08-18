@@ -1572,34 +1572,16 @@
             if (!currentTrip) return;
             await loadFamilies();
             await loadItems();
-            await loadMeals();  // Load meals FIRST so we have data
-            
-            // Check if trip has dates, if so generate calendar automatically
-            if (!window.tripCalendars) window.tripCalendars = {};
-            const calendar = window.tripCalendars[currentTrip];
-            console.log('📅 Calendar object:', calendar);
-            
-            if (calendar?.startDate && calendar?.numDays) {
-                // Convert Date object to YYYY-MM-DD string if needed
-                let dateStr = calendar.startDate;
-                if (dateStr instanceof Date) {
-                    dateStr = dateStr.toISOString().split('T')[0];
-                } else if (typeof dateStr === 'string' && dateStr.includes('T')) {
-                    dateStr = dateStr.split('T')[0];
-                }
-                console.log('✅ Calling generateMealCalendar with:', {dateStr, numDays: calendar.numDays});
-                generateMealCalendar(dateStr, calendar.numDays);
-            } else {
-                console.warn('⚠️ No calendar dates found, skipping generation');
-            }
+            await loadMeals();  // loadMeals now handles calendar generation and meal population
             
             await loadOtherStuff();
             await loadLogistics();
             updateFamilyViewButtons();
             
-            // Hide "not generated" message if calendar has dates
+            // Hide "not generated" message if trip has dates
+            if (!window.tripCalendars) window.tripCalendars = {};
+            const calendar = window.tripCalendars[currentTrip];
             const shouldHide = (calendar?.startDate && calendar?.numDays);
-            console.log('📍 Hiding mealNoCalendar?', shouldHide);
             document.getElementById('mealNoCalendar').style.display = shouldHide ? 'none' : 'block';
         }
 
