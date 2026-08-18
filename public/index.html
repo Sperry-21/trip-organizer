@@ -1731,6 +1731,20 @@
 
         async function loadMeals() {
             try {
+                // First, ensure tripCalendars is set up for the current trip
+                if (!window.tripCalendars) window.tripCalendars = {};
+                if (!window.tripCalendars[currentTrip]) {
+                    const tripRes = await fetch(`/api/trips/${currentTrip}`);
+                    const tripData = await tripRes.json();
+                    if (tripData?.start_date && tripData?.num_days) {
+                        window.tripCalendars[currentTrip] = {
+                            startDate: tripData.start_date,
+                            numDays: tripData.num_days
+                        };
+                    }
+                }
+                
+                // Now load and render meals
                 const res = await fetch(`/api/trips/${currentTrip}/meals`);
                 const meals = await res.json();
                 window.allMeals = meals;  // Store for Family View
