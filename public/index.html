@@ -935,21 +935,7 @@
 
         <!-- Family View Tab -->
         <div id="family" class="content">
-            <div class="family-selector" id="familySelector"></div>
-            <div id="familyViewContent" class="family-view-content">
-                <div class="family-section">
-                    <div class="family-section-title">Meals</div>
-                    <div id="familyMeals"></div>
-                </div>
-                <div class="family-section">
-                    <div class="family-section-title">Other Food Items</div>
-                    <div id="familyOtherStuff"></div>
-                </div>
-                <div class="family-section">
-                    <div class="family-section-title">Items They're Bringing</div>
-                    <div id="familyItems"></div>
-                </div>
-            </div>
+            <div id="familyViewContent" class="family-view-content"></div>
         </div>
 
         <!-- Admin Tab -->
@@ -1553,13 +1539,8 @@
                 return;
             }
 
-            tripFamilies.forEach(fam => {
-                const btn = document.createElement('button');
-                btn.className = 'family-btn';
-                btn.textContent = fam.name;
-                btn.addEventListener('click', () => selectFamily(fam.id, fam.name));
-                familySelector.appendChild(btn);
-            });
+            // Instead of buttons, just render the family cards directly
+            renderFamilyCards();
         }
 
         async function loadTripData() {
@@ -2562,46 +2543,159 @@
         }
 
         function selectFamily(familyId, familyName) {
-            document.querySelectorAll('.family-btn').forEach(btn => btn.classList.remove('active'));
-            event.target.classList.add('active');
-            document.getElementById('familyViewContent').classList.add('active');
+            // Show card-based view for all families
+            renderFamilyCards();
+        }
 
-            const familyMeals = window.allMeals?.filter(m => m.family_id == familyId) || [];
-            const familyOtherStuff = window.otherStuffData?.filter(os => os.family_id == familyId) || [];
-            const familyItems = window.allItems?.filter(i => i.person == familyId) || [];
+        function renderFamilyCards() {
+            const container = document.getElementById('familyViewContent');
+            container.innerHTML = '';
+            
+            // Set container to use grid layout for family cards
+            container.style.cssText = `
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+                gap: 15px;
+                width: 100%;
+                padding: 0;
+            `;
 
-            document.getElementById('familyMeals').innerHTML = familyMeals.length ? 
-                familyMeals.map(m => {
-                    // Parse date string in local timezone (not UTC)
-                    const [year, month, day] = m.meal_date.split('-');
-                    const dateObj = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
-                    const day_str = dateObj.toLocaleDateString('en-US', { weekday: 'short' });
-                    const isKids = m.meal_category === 'Kids Meal';
-                    const hasNoFood = !m.meal_name || m.meal_name.trim() === '';
-                    const borderStyle = hasNoFood ? '3px solid #ff0000' : `4px solid ${isKids ? '#ff6b9d' : '#667eea'}`;
-                    const bgColor = hasNoFood ? '#fff5f5' : 'white';
-                    return `
-                        <div style="padding: 10px; background: ${bgColor}; border-radius: 4px; margin-bottom: 8px; border-left: ${borderStyle}${hasNoFood ? '; border: 2px solid #ff0000;' : ''}; cursor: pointer;" onclick="openMealModal('${m.meal_date}', ${m.id})">
-                            <div style="font-weight: 600; color: ${isKids ? '#ff6b9d' : '#667eea'}; font-size: 13px;">${day_str.toUpperCase()} ${m.meal_time}${isKids ? ' 👶' : ''}${m.headcount ? ` • ${m.headcount} ppl` : ''}</div>
-                            ${m.meal_name ? `<div style="margin-top: 4px; color: #333; font-weight: 500;">${m.meal_name}</div>` : `<div style="margin-top: 4px; color: #ff0000; font-weight: bold;">⚠️ NO FOOD (${m.family_name || 'Unknown'})</div>`}
-                            ${m.description ? `<div style="margin-top: 4px; color: #666; font-size: 12px;">${m.description}</div>` : ''}
-                        </div>
+            // Get trip-specific families
+            const tripFamilies = window.tripFamilies?.[currentTrip] || [];
+            
+            tripFamilies.forEach(family => {
+                const familyId = family.id;
+                const familyMeals = window.allMeals?.filter(m => m.family_id == familyId) || [];
+                const familyOtherStuff = window.otherStuffData?.filter(os => os.family_id == familyId) || [];
+                const familyItems = window.allItems?.filter(i => i.person == familyId) || [];
+
+                // Create card for this family
+                const card = document.createElement('div');
+                const borderColor = family.color || '#667eea';
+                card.style.cssText = `
+                    border: 3px solid ${borderColor};
+                    border-radius: 8px;
+                    padding: 15px;
+                    background: white;
+                `;
+
+                // Family name header
+                const headerDiv = document.createElement('div');
+                headerDiv.style.cssText = `
+                    font-weight: 600;
+                    font-size: 16px;
+                    color: ${borderColor};
+                    margin-bottom: 15px;
+                    padding-bottom: 10px;
+                    border-bottom: 2px solid ${borderColor};
+                `;
+                headerDiv.textContent = family.name;
+                card.appendChild(headerDiv);
+
+                // Meals section
+                if (familyMeals.length > 0) {
+                    const mealsLabel = document.createElement('div');
+                    mealsLabel.style.cssText = `
+                        font-size: 11px;
+                        color: #999;
+                        font-weight: 600;
+                        margin-top: 12px;
+                        margin-bottom: 6px;
+                        text-transform: uppercase;
+                        letter-spacing: 0.5px;
                     `;
-                }).join('') :
-                '<div class="family-section-empty">No meals assigned</div>';
+                    mealsLabel.textContent = 'Meals';
+                    card.appendChild(mealsLabel);
 
-            document.getElementById('familyOtherStuff').innerHTML = familyOtherStuff.length ?
-                familyOtherStuff.map(os => `<div style="padding: 8px; background: white; border-radius: 4px; margin-bottom: 6px;">• ${os.item}</div>`).join('') :
-                '<div class="family-section-empty">No items</div>';
+                    familyMeals.forEach(m => {
+                        const [year, month, day] = m.meal_date.split('-');
+                        const dateObj = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+                        const day_str = dateObj.toLocaleDateString('en-US', { weekday: 'short' });
+                        const isKids = m.meal_category === 'Kids Meal';
+                        const hasNoFood = !m.meal_name || m.meal_name.trim() === '';
 
-            document.getElementById('familyItems').innerHTML = familyItems.length ?
-                familyItems.map(item => `
-                    <div style="padding: 8px; background: white; border-radius: 4px; margin-bottom: 6px;">
-                        <strong>${item.item}</strong>
-                        <div style="font-size: 12px; color: #666; margin-top: 2px;">${item.category}${item.notes ? ' • ' + item.notes : ''}</div>
-                    </div>
-                `).join('') :
-                '<div class="family-section-empty">Not bringing anything</div>';
+                        const mealDiv = document.createElement('div');
+                        mealDiv.style.cssText = `
+                            padding: 8px;
+                            background: ${hasNoFood ? '#fff5f5' : '#f9f9f9'};
+                            border-radius: 4px;
+                            margin-bottom: 6px;
+                            border-left: 3px solid ${hasNoFood ? '#ff0000' : (isKids ? '#ff6b9d' : '#667eea')};
+                            cursor: pointer;
+                            font-size: 12px;
+                        `;
+                        mealDiv.onclick = () => openMealModal(m.meal_date, m.id);
+                        
+                        const mealTime = document.createElement('div');
+                        mealTime.style.cssText = `font-weight: 600; color: ${isKids ? '#ff6b9d' : '#667eea'}; font-size: 11px;`;
+                        mealTime.textContent = `${day_str.toUpperCase()} ${m.meal_time}${isKids ? ' 👶' : ''}${m.headcount ? ` • ${m.headcount}p` : ''}`;
+                        mealDiv.appendChild(mealTime);
+
+                        const mealName = document.createElement('div');
+                        mealName.style.cssText = `margin-top: 3px; color: ${hasNoFood ? '#ff0000' : '#333'}; font-weight: ${hasNoFood ? 'bold' : '500'}; font-size: 11px;`;
+                        mealName.textContent = hasNoFood ? `⚠️ NO FOOD` : m.meal_name;
+                        mealDiv.appendChild(mealName);
+
+                        card.appendChild(mealDiv);
+                    });
+                }
+
+                // Other Food Items section
+                if (familyOtherStuff.length > 0) {
+                    const otherLabel = document.createElement('div');
+                    otherLabel.style.cssText = `
+                        font-size: 11px;
+                        color: #999;
+                        font-weight: 600;
+                        margin-top: 12px;
+                        margin-bottom: 6px;
+                        text-transform: uppercase;
+                        letter-spacing: 0.5px;
+                    `;
+                    otherLabel.textContent = 'Other Food Items';
+                    card.appendChild(otherLabel);
+
+                    familyOtherStuff.forEach(os => {
+                        const itemDiv = document.createElement('div');
+                        itemDiv.style.cssText = 'padding: 5px 0; font-size: 12px; color: #333;';
+                        itemDiv.textContent = `• ${os.item}`;
+                        card.appendChild(itemDiv);
+                    });
+                }
+
+                // Items section
+                if (familyItems.length > 0) {
+                    const itemsLabel = document.createElement('div');
+                    itemsLabel.style.cssText = `
+                        font-size: 11px;
+                        color: #999;
+                        font-weight: 600;
+                        margin-top: 12px;
+                        margin-bottom: 6px;
+                        text-transform: uppercase;
+                        letter-spacing: 0.5px;
+                    `;
+                    itemsLabel.textContent = 'Bringing Items';
+                    card.appendChild(itemsLabel);
+
+                    familyItems.forEach(item => {
+                        const itemDiv = document.createElement('div');
+                        itemDiv.style.cssText = 'padding: 5px 0; font-size: 12px; color: #333;';
+                        itemDiv.innerHTML = `<strong>• ${item.item}</strong><div style="font-size: 11px; color: #999; margin-top: 2px;">${item.category}${item.notes ? ' • ' + item.notes : ''}</div>`;
+                        card.appendChild(itemDiv);
+                    });
+                }
+
+                // Show empty state if no data
+                if (familyMeals.length === 0 && familyOtherStuff.length === 0 && familyItems.length === 0) {
+                    const emptyDiv = document.createElement('div');
+                    emptyDiv.style.cssText = 'color: #999; font-size: 12px; font-style: italic; text-align: center; padding: 20px;';
+                    emptyDiv.textContent = 'No meals, food items, or bringing items assigned';
+                    card.appendChild(emptyDiv);
+                }
+
+                container.appendChild(card);
+            });
         }
 
         async function addFamily() {
