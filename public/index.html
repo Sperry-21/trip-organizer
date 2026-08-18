@@ -898,7 +898,7 @@
             <div style="margin-top: 40px; background: #f9f9f9; padding: 20px; border-radius: 8px;">
                 <h3 style="margin-bottom: 15px; color: #333; font-size: 18px; border-bottom: 2px solid #667eea; padding-bottom: 10px;">Other Food Items</h3>
                 
-                <!-- Add Other Stuff Form -->
+                <!-- Add Other Food Items Form -->
                 <div style="background: white; padding: 15px; border-radius: 6px; margin-bottom: 20px; display: grid; grid-template-columns: 1fr 1fr auto; gap: 10px;">
                     <select id="otherStuffFamily" required style="padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;">
                         <option value="">-- Family --</option>
@@ -942,7 +942,7 @@
                     <div id="familyMeals"></div>
                 </div>
                 <div class="family-section">
-                    <div class="family-section-title">Other Stuff</div>
+                    <div class="family-section-title">Other Food Items</div>
                     <div id="familyOtherStuff"></div>
                 </div>
                 <div class="family-section">
@@ -2082,7 +2082,8 @@
                     const headcount = meal.headcount ? ` • ${meal.headcount}p` : '';
                     const familyNameColor = hasNoFood ? '#ff0000' : (isKids ? '#ff6b9d' : '#667eea');
                     const familyNameWeight = hasNoFood ? 'bold' : 'normal';
-                    mealDiv.innerHTML = `<strong style="color: ${isKids ? '#ff6b9d' : '#667eea'}; font-size: 10px;">${meal.meal_time}${isKids ? ' 👶' : ''}${headcount}</strong><div style="color: ${familyNameColor}; font-size: 10px; margin-top: 2px; font-weight: ${familyNameWeight};">${meal.meal_name || '⚠️ NO FOOD LISTED'}</div>`;
+                    const foodText = meal.meal_name || `⚠️ NO FOOD (${meal.family_name || 'Unknown'})`;
+                    mealDiv.innerHTML = `<strong style="color: ${isKids ? '#ff6b9d' : '#667eea'}; font-size: 10px;">${meal.meal_time}${isKids ? ' 👶' : ''}${headcount}</strong><div style="color: ${familyNameColor}; font-size: 10px; margin-top: 2px; font-weight: ${familyNameWeight};">${foodText}</div>`;
                     
                     // Insert before the add button
                     const addBtn = cell.querySelector('button');
@@ -2103,7 +2104,12 @@
             mealDiv.style.cursor = 'pointer';
             mealDiv.style.fontSize = '12px';
             const isKids = meal.meal_category === 'Kids Meal';
-            mealDiv.style.borderLeft = isKids ? '4px solid #ff6b9d' : '4px solid #667eea';
+            const hasNoFood = !meal.meal_name || meal.meal_name.trim() === '';
+            mealDiv.style.borderLeft = hasNoFood ? '4px solid #ff0000' : (isKids ? '4px solid #ff6b9d' : '4px solid #667eea');
+            if (hasNoFood) {
+                mealDiv.style.border = '2px solid #ff0000';
+                mealDiv.style.background = '#fff5f5';
+            }
             mealDiv.style.display = 'flex';
             mealDiv.style.justifyContent = 'space-between';
             mealDiv.style.alignItems = 'flex-start';
@@ -2116,7 +2122,7 @@
             contentDiv.innerHTML = `
                 <div style="font-weight: 600; color: ${isKids ? '#ff6b9d' : '#667eea'}; font-size: 11px;">${meal.meal_time.toUpperCase()}${isKids ? ' 👶' : ''}${meal.headcount ? ` • ${meal.headcount} ppl` : ''}</div>
                 <div style="margin-top: 3px; color: #333; font-weight: 500; font-size: 13px;">${meal.family_name || 'Unknown'}</div>
-                ${meal.meal_name ? `<div style="margin-top: 3px; color: #666; font-size: 11px;">${meal.meal_name}</div>` : ''}
+                ${meal.meal_name ? `<div style="margin-top: 3px; color: #666; font-size: 11px;">${meal.meal_name}</div>` : `<div style="margin-top: 3px; color: #ff0000; font-weight: bold; font-size: 11px;">⚠️ NO FOOD (${meal.family_name || 'Unknown'})</div>`}
             `;
             
             const deleteBtn = document.createElement('button');
@@ -2505,7 +2511,7 @@
                     return `
                         <div style="padding: 10px; background: ${bgColor}; border-radius: 4px; margin-bottom: 8px; border-left: ${borderStyle}${hasNoFood ? '; border: 2px solid #ff0000;' : ''}; cursor: pointer;" onclick="openMealModal('${m.meal_date}', ${m.id})">
                             <div style="font-weight: 600; color: ${isKids ? '#ff6b9d' : '#667eea'}; font-size: 13px;">${day_str.toUpperCase()} ${m.meal_time}${isKids ? ' 👶' : ''}${m.headcount ? ` • ${m.headcount} ppl` : ''}</div>
-                            ${m.meal_name ? `<div style="margin-top: 4px; color: #333; font-weight: 500;">${m.meal_name}</div>` : `<div style="margin-top: 4px; color: #ff0000; font-weight: bold;">⚠️ NO FOOD LISTED</div>`}
+                            ${m.meal_name ? `<div style="margin-top: 4px; color: #333; font-weight: 500;">${m.meal_name}</div>` : `<div style="margin-top: 4px; color: #ff0000; font-weight: bold;">⚠️ NO FOOD (${m.family_name || 'Unknown'})</div>`}
                             ${m.description ? `<div style="margin-top: 4px; color: #666; font-size: 12px;">${m.description}</div>` : ''}
                         </div>
                     `;
