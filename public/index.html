@@ -1723,9 +1723,13 @@
                             startDate: tripData.start_date,
                             numDays: tripData.num_days
                         };
-                        // Generate the calendar grid FIRST (before meals render)
-                        generateMealCalendar(tripData.start_date, tripData.num_days);
                     }
+                }
+                
+                // Generate the calendar grid if we have dates (always, not just if we just fetched)
+                const calendarData = window.tripCalendars[currentTrip];
+                if (calendarData?.startDate && calendarData?.numDays) {
+                    generateMealCalendar(calendarData.startDate, calendarData.numDays);
                 }
                 
                 // Now load and render meals
