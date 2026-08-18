@@ -1327,6 +1327,8 @@
                 alert(`Trip cloned to "${newTripName}" with adjusted dates!`);
                 await loadTrips();
                 await renderExistingTrips();
+                await loadTrips();
+                await renderExistingTrips();
             } catch (err) {
                 console.error('Error cloning trip:', err);
                 alert('Failed to clone trip');
