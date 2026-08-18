@@ -2666,8 +2666,10 @@
             document.getElementById(tabName).classList.add('active');
             event.target.classList.add('active');
 
-            // Load data if switching to family view
-            if (tabName === 'family' && currentTrip) {
+            // Reload data when switching tabs
+            if (tabName === 'meals' && currentTrip) {
+                loadMeals();  // Reload meals to persist display
+            } else if (tabName === 'family' && currentTrip) {
                 window.allMeals = [];
                 window.allItems = [];
                 fetch(`/api/trips/${currentTrip}/meals`)
