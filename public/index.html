@@ -1222,6 +1222,9 @@
             const newTripName = prompt(`Clone "${sourceTriipId}" as:`, `${sourceTriipId}-copy`);
             if (!newTripName) return;
 
+            const newStartDateStr = prompt('New trip start date (YYYY-MM-DD):', new Date().toISOString().split('T')[0]);
+            if (!newStartDateStr) return;
+
             try {
                 // Fetch all data from source trip
                 const tripRes = await fetch(`/api/trips/${sourceTriipId}`);
@@ -1233,13 +1236,13 @@
                 const itemsRes = await fetch(`/api/trips/${sourceTriipId}/items`);
                 const sourceItems = await itemsRes.json();
 
-                // Create new trip with same dates and families
+                // Create new trip with NEW start date but same duration and families
                 await fetch('/api/trips', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         tripId: newTripName,
-                        startDate: sourceTrip.start_date,
+                        startDate: newStartDateStr,
                         numDays: sourceTrip.num_days,
                         families: sourceTrip.families ? JSON.parse(sourceTrip.families) : []
                     })
