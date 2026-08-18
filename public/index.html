@@ -1529,17 +1529,15 @@
         }
 
         function updateFamilyViewButtons() {
-            const familySelector = document.getElementById('familySelector');
-            familySelector.innerHTML = '';
-            
             // Get trip-specific families
             const tripFamilies = window.tripFamilies?.[currentTrip] || [];
             if (tripFamilies.length === 0) {
-                familySelector.innerHTML = '<div style="color: #999; font-size: 14px;">No families in this trip</div>';
+                const container = document.getElementById('familyViewContent');
+                container.innerHTML = '<div style="color: #999; font-size: 14px;">No families in this trip</div>';
                 return;
             }
 
-            // Instead of buttons, just render the family cards directly
+            // Render the family cards directly
             renderFamilyCards();
         }
 
