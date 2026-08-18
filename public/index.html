@@ -1248,6 +1248,16 @@
                     })
                 });
 
+                // CRITICAL: Immediately verify/set the dates with PATCH to ensure they stick
+                await fetch(`/api/trips/${newTripName}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        start_date: newStartDateStr,
+                        num_days: sourceTrip.num_days
+                    })
+                });
+
                 // Clone meals with adjusted dates
                 if (sourceTrip.start_date && sourceMeals.length > 0) {
                     const sourceStart = new Date(sourceTrip.start_date + 'T00:00:00');
