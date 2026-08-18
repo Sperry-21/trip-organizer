@@ -1218,6 +1218,85 @@
             }
         }
 
+        async function cloneTrip(sourceTriipId) {
+            const newTripName = prompt(`Clone "${sourceTriipId}" as:`, `${sourceTriipId}-copy`);
+            if (!newTripName) return;
+
+            try {
+                // Fetch all data from source trip
+                const tripRes = await fetch(`/api/trips/${sourceTriipId}`);
+                const sourceTrip = await tripRes.json();
+
+                const mealsRes = await fetch(`/api/trips/${sourceTriipId}/meals`);
+                const sourceMeals = await mealsRes.json();
+
+                const itemsRes = await fetch(`/api/trips/${sourceTriipId}/items`);
+                const sourceItems = await itemsRes.json();
+
+                // Create new trip with same dates and families
+                await fetch('/api/trips', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        tripId: newTripName,
+                        startDate: sourceTrip.start_date,
+                        numDays: sourceTrip.num_days,
+                        families: sourceTrip.families ? JSON.parse(sourceTrip.families) : []
+                    })
+                });
+
+                // Clone meals with adjusted dates
+                if (sourceTrip.start_date && sourceMeals.length > 0) {
+                    const sourceStart = new Date(sourceTrip.start_date + 'T00:00:00');
+                    
+                    for (const meal of sourceMeals) {
+                        const mealDate = new Date(meal.meal_date + 'T00:00:00');
+                        const dayOffset = Math.floor((mealDate - sourceStart) / (1000 * 60 * 60 * 24));
+                        
+                        const newDate = new Date(sourceStart);
+                        newDate.setDate(newDate.getDate() + dayOffset);
+                        const newDateStr = newDate.toISOString().split('T')[0];
+
+                        await fetch(`/api/trips/${newTripName}/meals`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                meal_date: newDateStr,
+                                meal_time: meal.meal_time,
+                                meal_name: meal.meal_name,
+                                family_id: meal.family_id,
+                                meal_category: meal.meal_category,
+                                description: meal.description,
+                                headcount: meal.headcount
+                            })
+                        });
+                    }
+                }
+
+                // Clone items
+                for (const item of sourceItems) {
+                    await fetch(`/api/trips/${newTripName}/items`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            id: Math.random().toString(36).substr(2, 9),
+                            person: item.person,
+                            item: item.item,
+                            category: item.category,
+                            notes: item.notes
+                        })
+                    });
+                }
+
+                alert(`Trip cloned to "${newTripName}" with adjusted dates!`);
+                await loadTrips();
+                await renderExistingTrips();
+            } catch (err) {
+                console.error('Error cloning trip:', err);
+                alert('Failed to clone trip');
+            }
+        }
+
         async function renderExistingTrips() {
             const container = document.getElementById('existingTripsList');
             container.innerHTML = '';
@@ -1291,6 +1370,25 @@
                         deleteTrip(tripId);
                     };
                     card.appendChild(deleteBtn);
+
+                    // Clone button
+                    const cloneBtn = document.createElement('button');
+                    cloneBtn.textContent = '📋 Clone Trip';
+                    cloneBtn.style.width = '100%';
+                    cloneBtn.style.padding = '8px';
+                    cloneBtn.style.marginTop = '8px';
+                    cloneBtn.style.background = '#e8f0ff';
+                    cloneBtn.style.color = '#667eea';
+                    cloneBtn.style.border = '1px solid #bdd5ff';
+                    cloneBtn.style.borderRadius = '4px';
+                    cloneBtn.style.cursor = 'pointer';
+                    cloneBtn.style.fontSize = '12px';
+                    cloneBtn.style.fontWeight = '600';
+                    cloneBtn.onclick = (e) => {
+                        e.stopPropagation();
+                        cloneTrip(tripId);
+                    };
+                    card.appendChild(cloneBtn);
                     
                     container.appendChild(card);
                 } catch (err) {
@@ -1808,72 +1906,49 @@
         }
 
         function renderDesktopGrid(calendar, mealsByDate) {
-            if (!window.tripCalendars || !window.tripCalendars[currentTrip]) {
-                console.log('⚠️ No tripCalendars data on desktop - falling back to mobile list');
-                return renderMobileList(calendar, mealsByDate, Object.keys(mealsByDate).sort());
-            }
+            // Simple list view - just display all meals sorted by date
+            const container = document.createElement('div');
+            container.style.cssText = 'display: flex; flex-direction: column; gap: 12px;';
 
-            const { startDate, numDays } = window.tripCalendars[currentTrip];
-            const start = new Date(startDate);
-            const gridContainer = document.createElement('div');
-            gridContainer.style.display = 'grid';
-            gridContainer.style.gridTemplateColumns = `repeat(${numDays}, 1fr)`;
-            gridContainer.style.gap = '10px';
+            const allDates = Object.keys(mealsByDate).sort();
+            
+            allDates.forEach(dateKey => {
+                const dayMeals = mealsByDate[dateKey];
+                const dateCard = document.createElement('div');
+                dateCard.style.cssText = 'border: 1px solid #ddd; border-radius: 8px; padding: 12px; background: #f9f9f9;';
 
-            for (let i = 0; i < numDays; i++) {
-                const currentDate = new Date(start);
-                currentDate.setDate(start.getDate() + i);
-                // Use local timezone date (YYYY-MM-DD) without UTC conversion
-                const year = currentDate.getFullYear();
-                const month = String(currentDate.getMonth() + 1).padStart(2, '0');
-                const day = String(currentDate.getDate()).padStart(2, '0');
-                const dateKey = `${year}-${month}-${day}`;
-                const dayName = currentDate.toLocaleDateString('en-US', { weekday: 'short' });
-                const dateNum = currentDate.getDate();
+                // Parse date to get day of week
+                const date = new Date(dateKey + 'T00:00:00');
+                const dayOfWeek = date.toLocaleDateString('en-US', { weekday: 'long' });
+                const dayNum = date.getDate();
+                const monthName = date.toLocaleDateString('en-US', { month: 'short' });
 
-                const cell = document.createElement('div');
-                cell.style.border = '1px solid #ddd';
-                cell.style.borderRadius = '8px';
-                cell.style.padding = '12px';
-                cell.style.minHeight = '200px';
-                cell.style.background = '#fafafa';
-                cell.style.display = 'flex';
-                cell.style.flexDirection = 'column';
-                cell.style.gap = '8px';
+                const dateHeader = document.createElement('div');
+                dateHeader.style.cssText = 'font-weight: bold; font-size: 14px; margin-bottom: 8px; color: #333;';
+                dateHeader.innerHTML = `${dayOfWeek} ${monthName} ${dayNum}`;
+                dateCard.appendChild(dateHeader);
 
-                const dateLabel = document.createElement('div');
-                dateLabel.style.fontWeight = 'bold';
-                dateLabel.style.fontSize = '13px';
-                dateLabel.style.textAlign = 'center';
-                dateLabel.style.paddingBottom = '8px';
-                dateLabel.style.borderBottom = '2px solid #ddd';
-                dateLabel.innerHTML = `<div style="font-size: 11px; color: #999;">${dayName}</div><div style="font-size: 16px; color: #333;">${dateNum}</div>`;
-                cell.appendChild(dateLabel);
-
-                const dayMeals = mealsByDate[dateKey] || [];
                 const mealOrder = { 'Breakfast': 1, 'Lunch': 2, 'Dinner': 3 };
                 dayMeals.sort((a, b) => (mealOrder[a.meal_time] || 999) - (mealOrder[b.meal_time] || 999));
-                dayMeals.forEach(meal => cell.appendChild(createMealEl(meal, dateKey)));
 
-                const addBtn = document.createElement('button');
-                addBtn.textContent = '+ Add';
-                addBtn.style.padding = '8px';
-                addBtn.style.background = '#f0f0f0';
-                addBtn.style.color = '#667eea';
-                addBtn.style.border = '1px dashed #667eea';
-                addBtn.style.borderRadius = '4px';
-                addBtn.style.cursor = 'pointer';
-                addBtn.style.fontSize = '11px';
-                addBtn.style.fontWeight = '600';
-                addBtn.style.marginTop = 'auto';
-                addBtn.onclick = () => openMealModal(dateKey);
-                addBtn.onmouseover = () => addBtn.style.background = '#e8e8e8';
-                addBtn.onmouseout = () => addBtn.style.background = '#f0f0f0';
-                cell.appendChild(addBtn);
-                gridContainer.appendChild(cell);
-            }
+                dayMeals.forEach(meal => {
+                    const mealDiv = document.createElement('div');
+                    mealDiv.style.cssText = 'padding: 8px; background: white; border-radius: 4px; border-left: 4px solid ' + (meal.meal_category === 'Kids Meal' ? '#ff6b9d' : '#667eea') + '; cursor: pointer; margin-bottom: 6px;';
+                    mealDiv.onclick = () => openMealModal(dateKey, meal.id);
+                    
+                    const isKids = meal.meal_category === 'Kids Meal';
+                    mealDiv.innerHTML = `
+                        <div style="font-weight: 600; color: ${isKids ? '#ff6b9d' : '#667eea'}; font-size: 11px;">${meal.meal_time.toUpperCase()}${isKids ? ' 👶' : ''}${meal.headcount ? ` • ${meal.headcount} ppl` : ''}</div>
+                        <div style="margin-top: 3px; color: #333; font-weight: 500; font-size: 13px;">${meal.family_name || 'Unknown'}</div>
+                        ${meal.meal_name ? `<div style="margin-top: 3px; color: #666; font-size: 11px;">${meal.meal_name}</div>` : ''}
+                    `;
+                    dateCard.appendChild(mealDiv);
+                });
 
-            calendar.appendChild(gridContainer);
+                container.appendChild(dateCard);
+            });
+
+            calendar.appendChild(container);
         }
 
         function createMealEl(meal, dateKey) {
