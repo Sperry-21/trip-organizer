@@ -2678,11 +2678,36 @@
                     itemsLabel.textContent = 'Equipment & Supplies';
                     card.appendChild(itemsLabel);
 
+                    // Group items by category
+                    const itemsByCategory = {};
                     familyItems.forEach(item => {
-                        const itemDiv = document.createElement('div');
-                        itemDiv.style.cssText = 'padding: 5px 0; font-size: 12px; color: #333;';
-                        itemDiv.innerHTML = `<strong>• ${item.item}</strong><div style="font-size: 11px; color: #999; margin-top: 2px;">${item.category}${item.notes ? ' • ' + item.notes : ''}</div>`;
-                        card.appendChild(itemDiv);
+                        if (!itemsByCategory[item.category]) {
+                            itemsByCategory[item.category] = [];
+                        }
+                        itemsByCategory[item.category].push(item);
+                    });
+
+                    // Display items organized by category
+                    Object.entries(itemsByCategory).forEach(([category, categoryItems]) => {
+                        const categoryLabel = document.createElement('div');
+                        categoryLabel.style.cssText = `
+                            font-size: 11px;
+                            color: #999;
+                            font-weight: 600;
+                            margin-top: 8px;
+                            margin-bottom: 4px;
+                            text-transform: uppercase;
+                            letter-spacing: 0.5px;
+                        `;
+                        categoryLabel.textContent = category;
+                        card.appendChild(categoryLabel);
+
+                        categoryItems.forEach(item => {
+                            const itemDiv = document.createElement('div');
+                            itemDiv.style.cssText = 'padding: 4px 0; font-size: 12px; color: #333;';
+                            itemDiv.innerHTML = `• ${item.item}${item.notes ? ` • ${item.notes}` : ''}`;
+                            card.appendChild(itemDiv);
+                        });
                     });
                 }
 
