@@ -1225,10 +1225,14 @@
             const newStartDateStr = prompt('New trip start date (YYYY-MM-DD):', new Date().toISOString().split('T')[0]);
             if (!newStartDateStr) return;
 
+            console.log('🔍 CLONE DEBUG - User entered date:', newStartDateStr);
+            alert(`Creating clone with start date: ${newStartDateStr}`);
+
             try {
                 // Fetch all data from source trip
                 const tripRes = await fetch(`/api/trips/${sourceTriipId}`);
                 const sourceTrip = await tripRes.json();
+                console.log('Source trip data:', sourceTrip);
 
                 const mealsRes = await fetch(`/api/trips/${sourceTriipId}/meals`);
                 const sourceMeals = await mealsRes.json();
@@ -1237,7 +1241,8 @@
                 const sourceItems = await itemsRes.json();
 
                 // Create new trip with NEW start date but same duration and families
-                await fetch('/api/trips', {
+                console.log('📤 Creating trip with:', { tripId: newTripName, startDate: newStartDateStr, numDays: sourceTrip.num_days });
+                const createRes = await fetch('/api/trips', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -1247,9 +1252,14 @@
                         families: sourceTrip.families ? JSON.parse(sourceTrip.families) : []
                     })
                 });
+                console.log('✓ Trip created, response:', createRes.status);
+
+                // Small delay to ensure DB write completes
+                await new Promise(r => setTimeout(r, 500));
 
                 // CRITICAL: Immediately verify/set the dates with PATCH to ensure they stick
-                await fetch(`/api/trips/${newTripName}`, {
+                console.log('📤 PATCHing trip with:', { startDate: newStartDateStr, numDays: sourceTrip.num_days });
+                const patchRes = await fetch(`/api/trips/${newTripName}`, {
                     method: 'PATCH',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -1257,6 +1267,13 @@
                         numDays: sourceTrip.num_days
                     })
                 });
+                console.log('✓ PATCH response:', patchRes.status);
+
+                // Verify the dates were actually saved
+                await new Promise(r => setTimeout(r, 500));
+                const verifyRes = await fetch(`/api/trips/${newTripName}`);
+                const verifyData = await verifyRes.json();
+                console.log('🔍 VERIFICATION - Saved trip data:', verifyData);
 
                 // Clone meals with adjusted dates
                 if (sourceTrip.start_date && sourceMeals.length > 0) {
